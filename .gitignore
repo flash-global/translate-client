@@ -1,0 +1,6 @@
+vendor/
+tests/_output/*
+.translations.lock
+data
+!tests/data
+translations

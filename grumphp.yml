@@ -1,0 +1,21 @@
+parameters:
+    git_dir: .
+    bin_dir: vendor/bin
+    ascii:
+        succeeded: ~
+        failed: ~
+    tasks:
+        phplint: ~
+        phpcs:
+            encoding: UTF-8
+            standard: PSR2
+            whitelist_patterns:
+                - /^src\/(.*)/
+                - /^tests\/(unit|functional|acceptance)\/(.*)/
+        phpcpd:
+            exclude: ['vendor']
+        phpmd:
+            exclude: ['tests/_support']
+            ruleset: [ruleset.xml]
+            triggered_by: ['php', 'phtml']
+        codeception: ~
