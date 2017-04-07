@@ -14,17 +14,20 @@ class UpdateTranslationHandler
 {
     use ConfigAwareTrait;
 
+    public function __construct($config)
+    {
+        $this->importConfig($config);
+    }
+
     public function __invoke()
     {
         $body = (isset($_POST['body'])) ? $_POST['body'] : null;
 
         if (null !== $body) {
-            $this->importConfig();
-
             $config = $this->getConfig();
             $this->importArchive($config['data_path'], $body);
         } elseif (isset($_GET['getInfos'])) {
-            echo json_encode($this->importConfig());
+            echo json_encode($this->getConfig());
         }
     }
 
