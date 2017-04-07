@@ -49,10 +49,13 @@ trait ConfigAwareTrait
      *
      * @return array
      */
-    protected function importConfig()
+    protected function importConfig($config = null)
     {
         $file = $this->getConfigFilePath();
-        if (is_file($file)) {
+        if ($config !== null) {
+            $this->setConfig($config);
+            $this->validateConfig();
+        } elseif (is_file($file)) {
             $config = include $file;
             $this->setConfig($config);
             $this->validateConfig();

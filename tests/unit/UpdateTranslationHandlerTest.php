@@ -17,7 +17,9 @@ class UpdateTranslationHandlerTest extends Unit
 {
     public function testUpdateTranslationHandlerIsCallable()
     {
-        $obj = new UpdateTranslationHandler();
+        $obj = Stub::make(UpdateTranslationHandler::class, [
+            'importConfig' => true
+        ]);
         $this->assertTrue(is_callable($obj));
     }
 
@@ -52,17 +54,19 @@ class UpdateTranslationHandlerTest extends Unit
         $this->expectException(TranslateException::class);
 
         $_POST['body'] = 'fake-body';
-        $handler->__invoke();
+        $handler->__construct([]);
     }
 
     public function testInvokeMethodWhenGetParameterGetInfosIsPassed()
     {
         $expected = ['fake-config'];
         $handler = Stub::make(UpdateTranslationHandler::class, [
-            'importConfig' => $expected
+            'importConfig' => $expected,
+            'getConfig' => $expected
         ]);
 
         $_GET['getInfos'] = true;
+        $handler->__construct($expected);
         ob_start();
         $handler->__invoke();
         $results = ob_get_clean();
@@ -110,7 +114,9 @@ class UpdateTranslationHandlerTest extends Unit
 
     public function testCreateDirectory()
     {
-        $handler = new UpdateTranslationHandler();
+        $handler = Stub::make(UpdateTranslationHandler::class, [
+            'importConfig' => true
+        ]);
 
         $dir = dirname(__DIR__) . '/data/tmp_not_exists';
 
@@ -122,7 +128,9 @@ class UpdateTranslationHandlerTest extends Unit
 
     public function testCopyFileWhenTheDestinationDoesNotExistsYet()
     {
-        $handler = new UpdateTranslationHandler();
+        $handler = Stub::make(UpdateTranslationHandler::class, [
+            'importConfig' => true
+        ]);
 
         $dir = dirname(__DIR__) . '/data/tmp';
         mkdir($dir, 0777, true);
@@ -142,7 +150,9 @@ class UpdateTranslationHandlerTest extends Unit
 
     public function testCopyFileWhenTheDestinationExists()
     {
-        $handler = new UpdateTranslationHandler();
+        $handler = Stub::make(UpdateTranslationHandler::class, [
+            'importConfig' => true
+        ]);
 
         $dir = dirname(__DIR__) . '/data/tmp';
         mkdir($dir, 0777, true);
@@ -172,7 +182,9 @@ class UpdateTranslationHandlerTest extends Unit
         file_put_contents($base . '/a/b/c/file.txt', 'file');
         file_put_contents($base . '/a/b/c/d/file.txt', 'file');
 
-        $handler = new UpdateTranslationHandler();
+        $handler = Stub::make(UpdateTranslationHandler::class, [
+            'importConfig' => true
+        ]);
 
         $this->assertDirectoryExists($dir);
         $this->invokeNonPublicMethod($handler, 'rmdir', [$base . '/a']);

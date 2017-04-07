@@ -53,11 +53,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     protected static $client = null;
 
-    public function __construct(array $options = array())
+    public function __construct(array $options = array(), $config = null)
     {
         parent::__construct($options);
 
-        $this->importConfig();
+        $this->importConfig($config);
 
         $this->initDispatcher();
     }
@@ -447,8 +447,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
         if (!empty($url['path'])) {
             $this->setDispatcher(
                 \FastRoute\simpleDispatcher(function (RouteCollector $r) use ($url) {
-                    $r->addRoute('POST', $url['path'], new UpdateTranslationHandler());
-                    $r->addRoute('GET', $url['path'], new UpdateTranslationHandler());
+                    $r->addRoute('POST', $url['path'], new UpdateTranslationHandler($this->getConfig()));
+                    $r->addRoute('GET', $url['path'], new UpdateTranslationHandler($this->getConfig()));
                 })
             );
         }
