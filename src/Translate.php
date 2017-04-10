@@ -16,6 +16,8 @@ use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
 use Fei\Service\Translate\Validator\I18nStringValidator;
 use Guzzle\Http\Exception\BadResponseException;
+use Psr\Http\Message\ResponseInterface;
+use Zend\Diactoros\Response;
 
 /**
  * Class Translate
@@ -47,6 +49,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @var Logger
      */
     protected $logger;
+
+    /**
+     * @var ResponseInterface
+     */
+    protected $response;
 
     /**
      * @var Translate
@@ -468,7 +475,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $pathInfo = $requestUri;
 
-        if (false !== $pos = strpos($pathInfo, '?')) {
+        if (false !== ($pos = strpos($pathInfo, '?'))) {
             $pathInfo = substr($pathInfo, 0, $pos);
         }
 
@@ -477,10 +484,28 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $info = $this->getDispatcher()->dispatch($requestMethod, $pathInfo);
 
         if ($info[0] == Dispatcher::FOUND) {
-            $info[1]($this);
+            $response = $info[1]($this);
+            
+            if ($response instanceof ResponseInterface) {
+                $this->setResponse($response);
+            }
         }
 
         return $this;
+    }
+
+    /**
+     * Emit the client response if exists and die...
+     */
+    public function emit()
+    {
+        if (headers_sent($file, $line)) {
+            throw new \LogicException('Headers already sent in %s on line %d', $file, $line);
+        }
+        if ($this->getResponse()) {
+            (new Response\SapiEmitter())->emit($this->getResponse());
+            exit();
+        }
     }
 
     /**
@@ -768,6 +793,29 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $logger->setFilterLevel(Notification::LVL_WARNING);
         $this->logger = $logger;
 
+        return $this;
+    }
+
+    /**
+     * Get Response
+     *
+     * @return ResponseInterface
+     */
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
+    /**
+     * Set Response
+     *
+     * @param ResponseInterface $response
+     *
+     * @return $this
+     */
+    public function setResponse($response)
+    {
+        $this->response = $response;
         return $this;
     }
 }

@@ -16,6 +16,7 @@ use Fei\Service\Translate\Client\Translate;
 use Fei\Service\Translate\Client\Utils\ArrayCollection;
 use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class TranslateTest
@@ -697,6 +698,16 @@ class TranslateTest extends Unit
 
         $this->assertEquals('fr_FR', $client->getLang());
         $this->assertAttributeEquals($client->getLang(), 'lang', $client);
+    }
+
+    public function testResponseAccessors()
+    {
+        $client = new Translate();
+        $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
+        $client->setResponse($response);
+
+        $this->assertEquals($response, $client->getResponse());
+        $this->assertAttributeEquals($client->getResponse(), 'response', $client);
     }
 
     public function testDomainAccessors()
