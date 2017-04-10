@@ -101,7 +101,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
      *
      * @return bool
      */
-    protected function buildDefaultSubscription()
+    public function buildDefaultSubscription()
     {
         $config = $this->getConfig();
 
