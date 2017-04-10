@@ -4,6 +4,7 @@ namespace Fei\Service\Translate\Client;
 use Fei\Service\Translate\Client\Exception\TranslateException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Zend\Diactoros\Response;
 
 /**
  * Class UpdateTranslationHandler
@@ -26,8 +27,10 @@ class UpdateTranslationHandler
         if (null !== $body) {
             $config = $this->getConfig();
             $this->importArchive($config['data_path'], $body);
+
+            return new Response('php://memory', 204);
         } elseif (isset($_GET['getInfos'])) {
-            echo json_encode($this->getConfig());
+            return new Response\JsonResponse($this->getConfig());
         }
     }
 
