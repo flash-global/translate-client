@@ -29,6 +29,18 @@ class Translate extends AbstractApiClient implements TranslateInterface
     use ConfigAwareTrait;
 
     const API_TRANSLATE_PATH_INFO = '/api/i18n-string';
+    const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
+    const OPTION_LOG_LEVEL = 'logLevel';
+
+    /**
+     * @var bool
+     */
+    protected $logOnMissingTranslation = false;
+
+    /**
+     * @var int
+     */
+    protected $logLevel = Notification::LVL_DEBUG;
 
     /**
      * @var string
@@ -678,10 +690,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
         }
 
         // translation not found, we log the warning
-        if (false === $found && $this->getLogger() instanceof Logger) {
+        if ($this->logOnMissingTranslation && false === $found && $this->getLogger() instanceof Logger) {
             $notif = new Notification([
                 'message' => 'Translation not found!',
-                'level' => Notification::LVL_WARNING,
+                'level' => $this->logLevel,
                 'context' => [
                     'key' => $key,
                     'domain' => $domain,
