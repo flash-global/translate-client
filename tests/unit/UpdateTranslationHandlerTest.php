@@ -67,11 +67,9 @@ class UpdateTranslationHandlerTest extends Unit
 
         $_GET['getInfos'] = true;
         $handler->__construct($expected);
-        ob_start();
-        $handler->__invoke();
-        $results = ob_get_clean();
+        $response = $handler->__invoke();
 
-        $this->assertEquals(json_encode($expected), $results);
+        $this->assertEquals(json_encode($expected), $response->getBody());
     }
 
     public function testImportArchiveWhenTranslationPathExists()
