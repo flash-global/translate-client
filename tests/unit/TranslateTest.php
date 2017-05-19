@@ -10,6 +10,7 @@ use Fei\ApiClient\ResponseDescriptor;
 use Fei\ApiClient\Transport\SyncTransportInterface;
 use Fei\Entity\Exception;
 use Fei\Service\Logger\Client\Logger;
+use Fei\Service\Logger\Entity\Notification;
 use Fei\Service\Translate\Client\Exception\TranslateException;
 use Fei\Service\Translate\Client\Exception\ValidationException;
 use Fei\Service\Translate\Client\Translate;
@@ -826,8 +827,114 @@ class TranslateTest extends Unit
             'getConfig' => [
                 'translations_path' => dirname(__DIR__) . '/data/translate'
             ],
+            'validateConfig' => true,
+            'initDispatcher' => null,
         ]);
 
+        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
+        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+
+        $this->assertEquals('KEY_FAKE', $translated);
+    }
+
+    public function testTranslateWhenLogOnMissingTranslationIsFalse()
+    {
+        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
+        $fakeLogger->expects($this->never())->method('notify');
+
+        $translate = Stub::make(Translate::class, [
+            'isDomain' => true,
+            'isLang' => true,
+            'getLogger' => $fakeLogger,
+            'getConfig' => [
+                'translations_path' => dirname(__DIR__) . '/data/translate'
+            ],
+            'validateConfig' => true,
+            'initDispatcher' => null,
+        ]);
+        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => false]);
+        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+
+        $this->assertEquals('KEY_FAKE', $translated);
+    }
+
+    public function testTranslateWhenLogOnMissingTranslationIsTrue()
+    {
+        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
+        $fakeLogger->expects($this->once())->method('notify');
+
+        $translate = Stub::make(Translate::class, [
+            'isDomain' => true,
+            'isLang' => true,
+            'getLogger' => $fakeLogger,
+            'getConfig' => [
+                'translations_path' => dirname(__DIR__) . '/data/translate'
+            ],
+            'validateConfig' => true,
+            'initDispatcher' => null,
+        ]);
+        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
+        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+
+        $this->assertEquals('KEY_FAKE', $translated);
+    }
+
+    public function testTranslateWhenLogLevelDefault()
+    {
+        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
+        $fakeLogger->expects($this->once())->method('notify')->with(new Notification([
+            'message' => 'Translation not found!',
+            'level' => Notification::LVL_DEBUG,
+            'context' => [
+                'key' => 'KEY_FAKE',
+                'domain' => '/one/domain',
+                'lang' => 'fr_FR'
+            ]
+        ]));
+
+        $translate = Stub::make(Translate::class, [
+            'isDomain' => true,
+            'isLang' => true,
+            'getLogger' => $fakeLogger,
+            'getConfig' => [
+                'translations_path' => dirname(__DIR__) . '/data/translate'
+            ],
+            'validateConfig' => true,
+            'initDispatcher' => null,
+        ]);
+        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
+        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+
+        $this->assertEquals('KEY_FAKE', $translated);
+    }
+
+    public function testTranslateWhenLogLevelWarning()
+    {
+        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
+        $fakeLogger->expects($this->once())->method('notify')->with(new Notification([
+            'message' => 'Translation not found!',
+            'level' => Notification::LVL_WARNING,
+            'context' => [
+                'key' => 'KEY_FAKE',
+                'domain' => '/one/domain',
+                'lang' => 'fr_FR'
+            ]
+        ]));
+
+        $translate = Stub::make(Translate::class, [
+            'isDomain' => true,
+            'isLang' => true,
+            'getLogger' => $fakeLogger,
+            'getConfig' => [
+                'translations_path' => dirname(__DIR__) . '/data/translate'
+            ],
+            'validateConfig' => true,
+            'initDispatcher' => null,
+        ]);
+        $translate->__construct([
+            Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true,
+            Translate::OPTION_LOG_LEVEL => Notification::LVL_WARNING
+        ]);
         $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
 
         $this->assertEquals('KEY_FAKE', $translated);

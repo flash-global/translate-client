@@ -15,11 +15,21 @@ class UpdateTranslationHandler
 {
     use ConfigAwareTrait;
 
+    /**
+     * UpdateTranslationHandler constructor.
+     *
+     * @param array $config
+     */
     public function __construct($config)
     {
         $this->importConfig($config);
     }
 
+    /**
+     * Handle Update request
+     *
+     * @return Response|Response\JsonResponse
+     */
     public function __invoke()
     {
         $body = (isset($_POST['body'])) ? $_POST['body'] : null;
