@@ -497,7 +497,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         if ($info[0] == Dispatcher::FOUND) {
             $response = $info[1]($this);
-            
+
             if ($response instanceof ResponseInterface) {
                 $this->setResponse($response);
             }
@@ -512,7 +512,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
     public function emit()
     {
         if (headers_sent($file, $line)) {
-            throw new \LogicException('Headers already sent in %s on line %d', $file, $line);
+            throw new \LogicException(sprintf('Headers already sent in %s on line %d', $file, $line));
         }
         if ($this->getResponse()) {
             (new Response\SapiEmitter())->emit($this->getResponse());
