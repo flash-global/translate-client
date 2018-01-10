@@ -643,7 +643,7 @@
             ],
             "description": "FEI client side API helpers",
             "support": {
-                "source": "https://github.com/flash-global/api-client/tree/master",
+                "source": "https://github.com/flash-global/api-client/tree/v1.1.8",
                 "issues": "https://github.com/flash-global/api-client/issues"
             },
             "time": "2016-12-23T14:28:48+00:00"
@@ -654,13 +654,13 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/entities.git",
-                "reference": "fab6a97698dcc5e5bf2f6ab64979b0a880f88978"
+                "reference": "bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://composer.flash-global.net/dist/fei-entities-fab6a97698dcc5e5bf2f6ab64979b0a880f88978-zip-683dd0.zip",
-                "reference": "fab6a97698dcc5e5bf2f6ab64979b0a880f88978",
-                "shasum": "da826f00087411fb9ef5948c91eb0ebda2849fe4"
+                "url": "https://composer.flash-global.net/dist/fei-entities-bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab-zip-acd356.zip",
+                "reference": "bf2aa1ae8c0c49cb6989c58c721a45e8692a52ab",
+                "shasum": "67bf0a2ab69dfdb61a376b8ced88c87ed7f47e03"
             },
             "require-dev": {
                 "codeception/codeception": "^2.2",
@@ -676,6 +676,10 @@
                 "Proprietary"
             ],
             "description": "Entities descriptors and helpers",
+            "support": {
+                "source": "https://github.com/flash-global/entities/tree/v1.0.4",
+                "issues": "https://github.com/flash-global/entities/issues"
+            },
             "time": "2016-07-18T12:12:09+00:00"
         },
         {
@@ -768,17 +772,17 @@
         },
         {
             "name": "fei/translate-common",
-            "version": "v1.0.3",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "git@github.com:flash-global/translate-common.git",
-                "reference": "beb436d6da212209698125199708a3362ff40877"
+                "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://composer.flash-global.net/dist/fei-translate-common-beb436d6da212209698125199708a3362ff40877-zip-cbe7ec.zip",
-                "reference": "beb436d6da212209698125199708a3362ff40877",
-                "shasum": "8a9e5e6e7e9d564abbe33c4d6ced143305ac87a4"
+                "url": "https://composer.flash-global.net/dist/fei-translate-common-4beca7c1007571a5fbb0c81580bf65978de32c25-zip-5cc6e8.zip",
+                "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25",
+                "shasum": "66c09b249a1e3da60b5713b2c0abbc231e3c60b9"
             },
             "require": {
                 "fei/entities": "^1.0.3",
@@ -809,11 +813,7 @@
             "keywords": [
                 "translate"
             ],
-            "support": {
-                "source": "https://github.com/flash-global/translate-common/tree/v1.0.3",
-                "issues": "https://github.com/flash-global/translate-common/issues"
-            },
-            "time": "2017-05-19T10:33:39+00:00"
+            "time": "2018-01-10T13:19:54+00:00"
         },
         {
             "name": "guzzle/guzzle",
