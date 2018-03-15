@@ -17,7 +17,9 @@ use Fei\Service\Translate\Client\Translate;
 use Fei\Service\Translate\Client\Utils\ArrayCollection;
 use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use ZipArchive;
 
 /**
  * Class TranslateTest
@@ -266,8 +268,6 @@ class TranslateTest extends Unit
     public function testFetchOne()
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
-
-        $flag = null;
 
         $data = $this->getValidI18nString()->toArray();
 
@@ -583,7 +583,6 @@ class TranslateTest extends Unit
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
         $request = new RequestDescriptor();
-        $flag = null;
 
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
@@ -611,7 +610,6 @@ class TranslateTest extends Unit
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
         $request = new RequestDescriptor();
-        $flag = null;
 
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
@@ -639,7 +637,6 @@ class TranslateTest extends Unit
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
         $request = new RequestDescriptor();
-        $flag = null;
 
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
@@ -994,14 +991,14 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $i18n_string = $this->getValidI18nString();
-        $res = $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18n_string]);
+        $i18nString = $this->getValidI18nString();
+        $res = $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18nString]);
         $this->assertNull($res);
 
-        $i18n_string->setContent('');
+        $i18nString->setContent('');
         $this->expectException(ValidationException::class);
         $this->expectExceptionMessage('I18nString entity is not valid: (content: Content cannot be empty)');
-        $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18n_string]);
+        $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18nString]);
     }
 
     public function testDomainWithNotADomain()
@@ -1075,5 +1072,252 @@ class TranslateTest extends Unit
         $this->assertFalse($this->invokeNonPublicMethod($translate, 'isLang', ['fr-FR']));
         $this->assertFalse($this->invokeNonPublicMethod($translate, 'isLang', ['fr-fr']));
         $this->assertFalse($this->invokeNonPublicMethod($translate, 'isLang', ['fr_FRA']));
+    }
+
+    public function testLockFileExpiredNotReadable()
+    {
+        $fixtureFile = __DIR__ . '/test.lock';
+
+        $fixtureConfig = [
+            'lock_file' => $fixtureFile
+        ];
+
+        $translate = $this->createMock(Translate::class);
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertTrue($this->invokeNonPublicMethod($translate, 'lockFileExpired'));
+    }
+
+    public function testLockFileExpiredNotExpired()
+    {
+        $fixtureFile = __DIR__ . '/test.lock';
+        file_put_contents($fixtureFile, time() - (24 * 60 * 60) - 1);
+
+        $fixtureConfig = [
+            'lock_file' => $fixtureFile
+        ];
+
+        $translate = $this->createMock(Translate::class);
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertTrue($this->invokeNonPublicMethod($translate, 'lockFileExpired'));
+        unlink($fixtureFile);
+    }
+
+    public function testLockFileExpired()
+    {
+        $fixtureFile = __DIR__ . '/test.lock';
+        file_put_contents($fixtureFile, time());
+
+        $fixtureConfig = [
+            'lock_file' => $fixtureFile
+        ];
+
+        $translate = $this->createMock(Translate::class);
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertFalse($this->invokeNonPublicMethod($translate, 'lockFileExpired'));
+        unlink($fixtureFile);
+    }
+
+
+    public function testBuildQueryNamespaces()
+    {
+        $fixtureNamespaces = [
+            '/test',
+            '/test2',
+        ];
+
+        $expected = 'namespaces[]=/test&namespaces[]=/test2';
+
+        $translate = new Translate();
+
+        $this->assertEquals(
+            $expected,
+            $this->invokeNonPublicMethod($translate, 'buildQueryNamespaces', [$fixtureNamespaces])
+        );
+    }
+
+    public function testManageUpdateFile()
+    {
+        $zip = new ZipArchive();
+        $zip->open(__DIR__ . '/test.zip', ZipArchive::CREATE);
+        file_put_contents(__DIR__ . '/test.json', 'test');
+        $zip->addFromString('test.json', file_get_contents(__DIR__ . '/test.json'));
+        $zip->close();
+        $fixtureData = base64_encode(file_get_contents(__DIR__ . '/test.zip'));
+
+        $fixtureConfig = [
+            'translations_path' => __DIR__,
+        ];
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getConfig'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertNull($this->invokeNonPublicMethod($translate, 'manageUpdateFile', [$fixtureData]));
+        unlink(__DIR__ . '/test.zip');
+        unlink(__DIR__ . '/test.json');
+    }
+
+    /**
+     * @depends testBuildQueryNamespaces
+     */
+    public function testFetchAllByServer()
+    {
+        $fixtureNamespace = [];
+        $fixtureServer = 'server';
+
+        $fixtureQueryNamespaces = 'queryNamespace';
+        $fixtureUrl = 'url';
+
+        $fixtureBodyJson = '["test"]';
+
+        $requestDescriptorMock = $this->createMock(ResponseDescriptor::class);
+
+        $bodyMock = $this->getMockBuilder(ResponseInterface::class)
+            ->setMethods(['getContents'])
+            ->getMockForAbstractClass();
+
+        $bodyMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($fixtureBodyJson);
+
+        $requestDescriptorMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($bodyMock);
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['setBaseUrl', 'buildQueryNamespaces', 'buildUrl', 'send', 'manageUpdateFile'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('setBaseUrl')
+            ->with($fixtureServer);
+
+        $translate->expects($this->once())
+            ->method('buildQueryNamespaces')
+            ->with($fixtureNamespace)
+            ->willReturn($fixtureQueryNamespaces);
+
+        $translate->expects($this->once())
+            ->method('buildUrl')
+            ->with(Translate::API_TRANSLATE_PATH_UPDATE . '?' . $fixtureQueryNamespaces)
+            ->willReturn($fixtureUrl);
+
+        $translate->expects($this->once())
+            ->method('send')
+            ->willReturn($requestDescriptorMock);
+
+        $translate->expects($this->once())
+            ->method('manageUpdateFile')
+            ->with(json_decode($fixtureBodyJson, true));
+
+        $this->assertNull(
+            $this->invokeNonPublicMethod($translate, 'fetchAllByServer', [$fixtureNamespace, $fixtureServer])
+        );
+    }
+
+    /**
+     * @depends testLockFileExpired
+     */
+    public function testFetchAllLocked()
+    {
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['lockFileExpired'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('lockFileExpired')
+            ->willReturn(false);
+
+        $this->assertNull($translate->fetchAll());
+    }
+
+    /**
+     * @depends testLockFileExpiredNotExpired
+     * @depends testLockFileExpired
+     */
+    public function testFetchAllNoServer()
+    {
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['lockFileExpired', 'checkTransport', 'getConfig'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('lockFileExpired')
+            ->willReturn(true);
+
+        $translate->expects($this->once())
+            ->method('checkTransport');
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
+
+        $this->expectException(TranslateException::class);
+        $this->expectExceptionMessage('No servers for update');
+
+        $translate->fetchAll();
+    }
+
+    /**
+     * @depends testLockFileExpired
+     * @depends testLockFileExpiredNotReadable
+     * @depends testCreateLockFile
+     */
+    public function testFetchAll()
+    {
+        $fixtureConfig = [
+            'servers' => [
+                'server1' => [
+                    'namespaces' => ['/test']
+                ]
+            ],
+            'lock_file' => 'test.lock',
+        ];
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['lockFileExpired', 'checkTransport', 'getConfig', 'fetchAllByServer', 'createLockFile'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('lockFileExpired')
+            ->willReturn(true);
+
+        $translate->expects($this->once())
+            ->method('checkTransport');
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $translate->expects($this->once())
+            ->method('fetchAllByServer')
+            ->with(['/test'], 'server1');
+
+        $translate->expects($this->once())
+            ->method('createLockFile')
+            ->with('test.lock');
+
+        $this->assertNull($translate->fetchAll());
     }
 }

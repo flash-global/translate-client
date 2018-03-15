@@ -1,6 +1,9 @@
 <?php
+
 namespace Fei\Service\Translate\Client;
 
+use DateInterval;
+use DateTime;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Fei\ApiClient\AbstractApiClient;
@@ -18,6 +21,7 @@ use Fei\Service\Translate\Validator\I18nStringValidator;
 use Guzzle\Http\Exception\BadResponseException;
 use Psr\Http\Message\ResponseInterface;
 use Zend\Diactoros\Response;
+use ZipArchive;
 
 /**
  * Class Translate
@@ -29,6 +33,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
     use ConfigAwareTrait;
 
     const API_TRANSLATE_PATH_INFO = '/api/i18n-string';
+    const API_TRANSLATE_PATH_UPDATE = '/api/translation-cache';
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
 
@@ -82,6 +87,16 @@ class Translate extends AbstractApiClient implements TranslateInterface
     }
 
     /**
+     * @param $path
+     * @return bool
+     */
+    protected function checkWritable($path)
+    {
+        return (is_dir($path) && !is_writable($path))
+            || (!is_dir($path) && !is_writable(pathinfo($path, PATHINFO_DIRNAME)));
+    }
+
+    /**
      * Check if the dir that have to be writable are
      *
      * @return bool
@@ -91,10 +106,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $config = $this->getConfig();
 
         // check if the directories are writable
-        if ((is_dir($config['data_path']) && !is_writable($config['data_path'])) ||
-            (is_dir($config['translations_path']) && !is_writable($config['translations_path'])) ||
-            (!is_dir($config['data_path']) && !is_writable(pathinfo($config['data_path'], PATHINFO_DIRNAME))) ||
-            (!is_dir($config['translations_path']) && !is_writable(pathinfo($config['translations_path'], PATHINFO_DIRNAME)))
+        if ($this->checkWritable($config['data_path'])
+            || $this->checkWritable($config['translations_path'])
         ) {
             if ($this->getLogger() instanceof Logger) {
                 $notif = new Notification([
@@ -166,6 +179,120 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $i18nString = $this->fetch($request);
 
         return $i18nString;
+    }
+
+    /**
+     * @param array $namespaces
+     * @return string
+     */
+    protected function buildQueryNamespaces(array $namespaces)
+    {
+        $fieldName = 'namespaces[]';
+        $query = [];
+
+        foreach ($namespaces as $namespace) {
+            $query[] = $fieldName . '=' . $namespace;
+        }
+
+        return implode('&', $query);
+    }
+
+    /**
+     * @param string $data
+     */
+    protected function manageUpdateFile($data)
+    {
+        $config = $this->getConfig();
+        $filePath = $config['translations_path'] . '/update.zip';
+
+        file_put_contents($filePath, base64_decode($data));
+
+        $zip = new ZipArchive();
+        $zip->open($filePath);
+        $zip->extractTo($config['translations_path']);
+
+        unlink($filePath);
+    }
+
+    /**
+     * @param array $namespaces
+     * @param string $server
+     */
+    protected function fetchAllByServer(array $namespaces, $server)
+    {
+        $this->setBaseUrl($server);
+        $queryNamespaces = $this->buildQueryNamespaces($namespaces);
+
+        $request = (new RequestDescriptor())
+            ->setMethod('GET')
+            ->setUrl($this->buildUrl(self::API_TRANSLATE_PATH_UPDATE . '?' . $queryNamespaces));
+
+        /** @var ResponseDescriptor $result */
+        $result = $this->send($request);
+
+        $bodyJson = $result->getBody()->getContents();
+        $bodyData = json_decode($bodyJson, true);
+
+        $this->manageUpdateFile($bodyData);
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    protected function lockFileExpired()
+    {
+        $config = $this->getConfig();
+
+        if (!is_readable($config['lock_file'])) {
+            return true;
+        }
+
+        $lockFileContent = file_get_contents($config['lock_file']);
+        $dateCreateLockFile = new DateTime();
+        $dateCreateLockFile->setTimestamp($lockFileContent);
+        $dateCreateLockFile->add(new DateInterval('PT24H'));
+        $now = new DateTime();
+
+        if ($now > $dateCreateLockFile) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * In charge to get translations from all translate servers
+     *
+     * @throws TranslateException
+     * @throws \Exception
+     */
+    public function fetchAll()
+    {
+        if (!$this->lockFileExpired()) {
+            return;
+        }
+
+        $this->checkTransport();
+
+        $config = $this->getConfig();
+        $servers = isset($config['servers']) ? $config['servers'] : null;
+
+        if (is_null($servers)) {
+            throw new TranslateException('No servers for update');
+        }
+
+        foreach ($servers as $server => $options) {
+            $namespaces = (isset($options['namespaces']) && is_array($options['namespaces']))
+                ? $options['namespaces']
+                : [];
+
+            if (!empty($namespaces)) {
+                $this->fetchAllByServer($namespaces, $server);
+            }
+        }
+
+        $this->createLockFile($config['lock_file']);
     }
 
     /**
@@ -497,7 +624,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         if ($info[0] == Dispatcher::FOUND) {
             $response = $info[1]($this);
-            
+
             if ($response instanceof ResponseInterface) {
                 $this->setResponse($response);
             }
@@ -649,6 +776,25 @@ class Translate extends AbstractApiClient implements TranslateInterface
     }
 
     /**
+     * @param $domain
+     * @param $lang
+     *
+     * @throws TranslateException
+     */
+    protected function checkTranslate($domain, $lang)
+    {
+        // domain not valid
+        if (!$this->isDomain($domain)) {
+            throw new TranslateException('This domain is not valid!', 400);
+        }
+
+        // lang not valid
+        if (!$this->isLang($lang)) {
+            throw new TranslateException('This lang is not valid!', 400);
+        }
+    }
+
+    /**
      * Get the translation for the key $key in the domain $domain for the lang $lang
      *
      * @param $key
@@ -662,15 +808,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $domain = null === $domain ? $this->getDomain() : $domain;
         $lang = null === $lang ? $this->getLang() : $lang;
 
-        // domain not valid
-        if (!$this->isDomain($domain)) {
-            throw new TranslateException('This domain is not valid!', 400);
-        }
-
-        // lang not valid
-        if (!$this->isLang($lang)) {
-            throw new TranslateException('This lang is not valid!', 400);
-        }
+        $this->checkTranslate($domain, $lang);
 
         $config = $this->getConfig();
         $translations = $config['translations_path'] . $domain . '/' . $lang . '.php';
