@@ -15,7 +15,7 @@ parameters:
         phpcpd:
             exclude: ['vendor']
         phpmd:
-            exclude: ['tests/_support']
+            exclude: ['tests/']
             ruleset: [ruleset.xml]
             triggered_by: ['php', 'phtml']
         codeception: ~
