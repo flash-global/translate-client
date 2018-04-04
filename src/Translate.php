@@ -487,9 +487,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         $config = $this->getConfig();
 
+        if ($config['skipSubscription']) {
+            return false;
+        }
+
         // already subscribed
         if (is_file($config['lock_file'])) {
             return true;
+        } else {
+            $this->createLockFile($config['lock_file']);
         }
 
         if ($server === null) {
@@ -501,7 +507,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $url = isset($config['url']) ? $config['url'] : null;
 
         if (null === $url) {
-            throw new TranslateException('Call url not configured in the config file!', 403);
+            $this->notify('Call url not configured in the config file', ['level' => Notification::LVL_ERROR]);
         }
 
         $params = [
@@ -515,17 +521,22 @@ class Translate extends AbstractApiClient implements TranslateInterface
             ->setUrl($this->buildUrl(self::API_TRANSLATE_PATH_INFO . '/subscribe'));
         $request->setBodyParams(['params' => \json_encode($params)]);
 
-        $res = $this->send($request);
+        try {
+            $res = $this->send($request);
+        } catch (\Exception $e) {
+            $this->notify('something went wrong while subscribing to translate', ['level' => Notification::LVL_ERROR]);
+            return false;
+        }
         $res = \json_decode($res->getBody(), true);
 
         // creating the lock file
-        if ($res === true) {
-            $this->createLockFile($config['lock_file']);
+        if ($res) {
+            return $res;
+        } else {
+            unlink($config['lock_file']);
         }
 
-        return $res;
     }
-
     /**
      * Remove the subscription callback
      *
@@ -807,8 +818,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $domain = null === $domain ? $this->getDomain() : $domain;
         $lang = null === $lang ? $this->getLang() : $lang;
+        // domain not valid
+        if (!$this->isDomain($domain)) {
+            throw new TranslateException('This domain is not valid!', 400);
+        }
 
-        $this->checkTranslate($domain, $lang);
+        // lang not valid
+        if (!$this->isLang($lang)) {
+            throw new TranslateException('This lang is not valid!', 400);
+        }
 
         $config = $this->getConfig();
         $translations = $config['translations_path'] . $domain . '/' . $lang . '.php';
@@ -816,15 +834,18 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $translated = $key;
         $found = false;
 
+        $localTranslation = $config['localTranslationsFile'];
         // check if the file where the translations are stored exists for this namespace
         if (is_file($translations)) {
             $translations = include $translations;
+        } elseif (is_file($localTranslation)) {
+            $translations = include $localTranslation;
+        }
 
-            // the translation exists
-            if (isset($translations[$key])) {
-                $found = true;
-                $translated = $translations[$key];
-            }
+        // the translation exists
+        if (isset($translations[$key])) {
+            $found = true;
+            $translated = $translations[$key];
         }
 
         // translation not found, we log the warning
@@ -967,5 +988,14 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $this->response = $response;
         return $this;
+    }
+
+    protected function notify(string $message, $params = []) {
+        if($this->getLogger() instanceof Logger) {
+            $notification = new Notification($params);
+            $notification->setMessage($message);
+
+            $this->getLogger()->notify($notification);
+        }
     }
 }
