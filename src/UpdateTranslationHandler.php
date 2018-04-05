@@ -32,6 +32,7 @@ class UpdateTranslationHandler
      */
     public function __invoke()
     {
+        error_log(print_r($_SERVER, true));
         $body = (isset($_POST['body'])) ? $_POST['body'] : null;
 
         if (null !== $body) {

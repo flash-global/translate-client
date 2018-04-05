@@ -123,13 +123,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
                 ]);
                 $this->getLogger()->notify($notif);
             }
-
-            throw new TranslateException(
-                'Both `' . $config['data_path'] . '` and `' . $config['translations_path'] . '` have to be writable!',
-                403
-            );
         }
-
         return true;
     }
 
@@ -515,10 +509,17 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $this->notify('Call url not configured in the config file', ['level' => Notification::LVL_ERROR]);
         }
 
+        $hostHeader = isset($config['hostHeader']) ? $config['hostHeader'] : null;
+
+        if (null === $hostHeader) {
+            $this->notify('host header not configured in the config file', ['level' => Notification::LVL_ERROR]);
+        }
+
         $params = [
             'namespaces' => $namespaces,
             'url' => $url,
-            'encoding' => $encoding
+            'encoding' => $encoding,
+            'host' => $hostHeader,
         ];
 
         $request = (new RequestDescriptor())
@@ -530,6 +531,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $res = $this->send($request);
         } catch (\Exception $e) {
             $this->notify('something went wrong while subscribing to translate', ['level' => Notification::LVL_ERROR]);
+            unlink($config['lock_file']);
             return false;
         }
         $res = \json_decode($res->getBody(), true);
