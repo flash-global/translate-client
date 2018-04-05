@@ -74,11 +74,12 @@ trait ConfigAwareTrait
     protected function validateConfig()
     {
         $config = $this->getConfig();
+        $skipSubscription = (isset($config['skipSubscription'])) ? (bool)$config['skipSubscription'] : false;
 
         $mandatoryKeys = ['lock_file', 'data_path', 'translations_path', 'url'];
 
         foreach ($mandatoryKeys as $key) {
-            if (!isset($config[$key])) {
+            if (!isset($config[$key]) && $skipSubscription === false) {
                 throw new TranslateException('The `' . $key . '` config must be specified!', 400);
             }
         }

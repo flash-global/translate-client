@@ -105,6 +105,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $config = $this->getConfig();
 
+        if (isset($config['skipSubscription']) && $config['skipSubscription']) {
+            return true;
+        }
+
         // check if the directories are writable
         if ($this->checkWritable($config['data_path'])
             || $this->checkWritable($config['translations_path'])
@@ -119,6 +123,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
                 ]);
                 $this->getLogger()->notify($notif);
             }
+
             throw new TranslateException(
                 'Both `' . $config['data_path'] . '` and `' . $config['translations_path'] . '` have to be writable!',
                 403
@@ -623,6 +628,13 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     public function handleRequest($requestUri = null, $requestMethod = null)
     {
+        $config = $this->getConfig();
+        $skipSubscription = (isset($config['skipSubscription'])) ? (bool)$config['skipSubscription'] : false;
+
+        if ($skipSubscription) {
+            return $this;
+        }
+
         $pathInfo = $requestUri;
 
         if (false !== ($pos = strpos($pathInfo, '?'))) {
@@ -818,28 +830,17 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $domain = null === $domain ? $this->getDomain() : $domain;
         $lang = null === $lang ? $this->getLang() : $lang;
-        // domain not valid
-        if (!$this->isDomain($domain)) {
-            throw new TranslateException('This domain is not valid!', 400);
-        }
-
-        // lang not valid
-        if (!$this->isLang($lang)) {
-            throw new TranslateException('This lang is not valid!', 400);
-        }
 
         $config = $this->getConfig();
-        $translations = $config['translations_path'] . $domain . '/' . $lang . '.php';
 
         $translated = $key;
         $found = false;
 
-        $localTranslation = $config['localTranslationsFile'];
         // check if the file where the translations are stored exists for this namespace
-        if (is_file($translations)) {
-            $translations = include $translations;
-        } elseif (is_file($localTranslation)) {
-            $translations = include $localTranslation;
+        if (isset($config['translations_path']) && is_file($config['translations_path'] . $domain . '/' . $lang . '.php')) {
+            $translations = include $config['translations_path'] . $domain . '/' . $lang . '.php';
+        } elseif (isset($config['localTranslationsFile']) && is_file($config['localTranslationsFile'])) {
+            $translations = include $config['localTranslationsFile'];
         }
 
         // the translation exists
