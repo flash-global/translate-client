@@ -150,8 +150,9 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $namespaces = (isset($options['namespaces']) &&
                 is_array($options['namespaces'])) ? $options['namespaces'] : [];
             $encoding = (isset($options['encoding'])) ? $options['encoding'] : 'UTF-8';
+            $host = (isset($options['host'])) ? $options['host'] : null;
 
-            $isOk = $isOk && $this->subscribe($server, $namespaces, $encoding);
+            $isOk = $isOk && $this->subscribe($server, $namespaces, $encoding, $host);
         }
 
         return $isOk;
@@ -478,9 +479,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @param array $namespaces
      * @param string $encoding
      *
+     * @param null $host
      * @return bool
      */
-    public function subscribe($server = null, array $namespaces = [], $encoding = 'UTF-8')
+    public function subscribe($server = null, array $namespaces = [], $encoding = 'UTF-8', $host = null)
     {
         $this->checkWritableDirectories();
 
@@ -490,6 +492,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
             return false;
         }
 
+        if ($server === null) {
+            return $this->buildDefaultSubscription();
+        }
+
         // already subscribed
         if (is_file($config['lock_file'])) {
             return true;
@@ -497,9 +503,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $this->createLockFile($config['lock_file']);
         }
 
-        if ($server === null) {
-            return $this->buildDefaultSubscription();
-        }
         $this->setBaseUrl($server);
         $this->checkTransport();
 
@@ -509,18 +512,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $this->notify('Call url not configured in the config file', ['level' => Notification::LVL_ERROR]);
         }
 
-        $hostHeader = isset($config['hostHeader']) ? $config['hostHeader'] : null;
-
-        if (null === $hostHeader) {
-            $this->notify('host header not configured in the config file', ['level' => Notification::LVL_ERROR]);
-        }
-
         $params = [
             'namespaces' => $namespaces,
             'url' => $url,
-            'encoding' => $encoding,
-            'host' => $hostHeader,
+            'encoding' => $encoding
         ];
+
+        if (null !== $host) {
+            $params['host'] = $host;
+        }
 
         $request = (new RequestDescriptor())
             ->setMethod('POST')
