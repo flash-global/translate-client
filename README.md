@@ -136,14 +136,15 @@ Translate client instance will first attempt to transfer the messages with Beans
 
 There are several methods in Translate class, all listed in the following table:
 
-| Method         | Parameters                                                       | Return                              |
+| Method        | Parameters                                                       | Return                              |
 |---------------|------------------------------------------------------------------|-------------------------------------|
-| fetchOne          | `int $id`                                                        | `I18nString`                        |
-| find           | `string $key, string $lang = '', string $domain = ''`            | `ArrayCollection` or `I18nString`   |
-| search           | `Pattern $pattern`                                               | `array`                             |
-| store           | `I18nString $string` or `array $string`                          | `array`                             |
-| update           | `I18nString $string` or `array $string`                          | `array`                             |
-| delete           | `int|I18nString|Pattern|string $parameter`                       | `bool`                              |
+| fetchOne      | `int $id`                                                        | `I18nString`                        |
+| fetchAll      |                                                                  |                                     |
+| find          | `string $key, string $lang = '', string $domain = ''`            | `ArrayCollection` or `I18nString`   |
+| search        | `Pattern $pattern`                                               | `array`                             |
+| store         | `I18nString $string` or `array $string`                          | `array`                             |
+| update        | `I18nString $string` or `array $string`                          | `array`                             |
+| delete        | `int` or `I18nString` or `Pattern` or `string` `$parameter`                       | `bool`                              |
 | subscribe     | `string $server = null, array $namespaces, $encoding = 'UTF-8'`  | `bool`                              |
 | unsubscribe   | `string $server = null, array $namespaces`                       | `bool`                              |
 | handleRequest | `string $requestUri = null, string $requestMethod = null`        | `Translate`                         |
