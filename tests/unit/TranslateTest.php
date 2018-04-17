@@ -112,10 +112,10 @@ class TranslateTest extends Unit
     {
         $translate = Stub::construct(Translate::class, [], [
             'getConfig' => [
-              'lock_file' => dirname(__DIR__) . '/data/lock_file'
+              'subscribe_lock' => dirname(__DIR__) . '/data/lock_file'
             ],
             'importConfig' => Stub::once(),
-            'checkWritableDirectories' => Stub::once(),
+            'checkWritableDirectories' => Stub::atLeastOnce(),
         ]);
 
         $result = $translate->subscribe();
@@ -142,13 +142,11 @@ class TranslateTest extends Unit
             'checkTransport' => Stub::once(),
             'importConfig' => Stub::once(),
             'checkWritableDirectories' => Stub::once(),
+            'notify' => Stub::once(),
             'getConfig' => Stub::once(function () {
                 return ['lock_file' => 'fake-lock'];
             }),
         ]);
-
-        $this->expectException(TranslateException::class);
-        $translate->subscribe('fake-server');
     }
 
     public function testSubscribeWhenServerAndUrlAreSet()
@@ -164,7 +162,8 @@ class TranslateTest extends Unit
             'getConfig' => Stub::once(function () {
                 return [
                     'url' => 'fake-url',
-                    'lock_file' => 'fake-lock_file'
+                    'lock_file' => 'fake-lock_file',
+                    'subscribe_lock' => 'fake-lock_file'
                 ];
             }),
             'send' => Stub::once(function () use ($responseMock) {
@@ -760,11 +759,9 @@ class TranslateTest extends Unit
     public function testTranslateWhenGivenDomainIsNotValid()
     {
         $translate = Stub::make(Translate::class, [
-            'isDomain' => false
+            'isDomain' => false,
+            'notify' => Stub::once()
         ]);
-
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('This domain is not valid!');
 
         $translate->translate('KEY', 'a/b');
     }
@@ -773,11 +770,9 @@ class TranslateTest extends Unit
     {
         $translate = Stub::make(Translate::class, [
             'isLang' => false,
-            'isDomain' => true
+            'isDomain' => true,
+            'notify' => Stub::once()
         ]);
-
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('This lang is not valid!');
 
         $translate->translate('KEY', 'a/b', 'fr_from_france');
     }

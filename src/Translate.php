@@ -105,6 +105,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $config = $this->getConfig();
 
+        if (isset($config['skipSubscription']) && $config['skipSubscription']) {
+            return true;
+        }
+
         // check if the directories are writable
         if ($this->checkWritable($config['data_path'])
             || $this->checkWritable($config['translations_path'])
@@ -119,12 +123,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
                 ]);
                 $this->getLogger()->notify($notif);
             }
-            throw new TranslateException(
-                'Both `' . $config['data_path'] . '` and `' . $config['translations_path'] . '` have to be writable!',
-                403
-            );
         }
-
         return true;
     }
 
@@ -142,7 +141,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         // no server in the config => using to server used by this instance of the client
         if (null === $servers) {
-            $servers = (null === $servers) ? [$this->getBaseUrl() => []] : $servers;
+            $servers = [$this->getBaseUrl() => []];
         }
 
         foreach ($servers as $server => $options) {
@@ -151,8 +150,9 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $namespaces = (isset($options['namespaces']) &&
                 is_array($options['namespaces'])) ? $options['namespaces'] : [];
             $encoding = (isset($options['encoding'])) ? $options['encoding'] : 'UTF-8';
+            $host = (isset($options['host'])) ? $options['host'] : null;
 
-            $isOk = $isOk && $this->subscribe($server, $namespaces, $encoding);
+            $isOk = $isOk && $this->subscribe($server, $namespaces, $encoding, $host);
         }
 
         return $isOk;
@@ -480,16 +480,21 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @param array $namespaces
      * @param string $encoding
      *
+     * @param null $host
      * @return bool
      */
-    public function subscribe($server = null, array $namespaces = [], $encoding = 'UTF-8')
+    public function subscribe($server = null, array $namespaces = [], $encoding = 'UTF-8', $host = null)
     {
         $this->checkWritableDirectories();
 
         $config = $this->getConfig();
 
-        if (!isset($config['subscribe_lock'])) {
-            $config['subscribe_lock'] = $config['lock_file'];
+        if (isset($config['skipSubscription']) && $config['skipSubscription']) {
+            return false;
+        }
+
+        if ($server === null) {
+            return $this->buildDefaultSubscription();
         }
 
         // already subscribed
@@ -497,38 +502,45 @@ class Translate extends AbstractApiClient implements TranslateInterface
             return true;
         }
 
-        if ($server === null) {
-            return $this->buildDefaultSubscription();
-        }
+        $this->createLockFile($config['lock_file']);
+
         $this->setBaseUrl($server);
         $this->checkTransport();
 
-        $url = isset($config['url']) ? $config['url'] : null;
-
-        if (null === $url) {
-            throw new TranslateException('Call url not configured in the config file!', 403);
+        if (!isset($config['url'])) {
+            $this->notify('Call url not configured in the config file', ['level' => Notification::LVL_ERROR]);
         }
 
         $params = [
             'namespaces' => $namespaces,
-            'url' => $url,
+            'url' => $config['url'],
             'encoding' => $encoding
         ];
+
+        if (null !== $host) {
+            $params['host'] = $host;
+        }
 
         $request = (new RequestDescriptor())
             ->setMethod('POST')
             ->setUrl($this->buildUrl(self::API_TRANSLATE_PATH_INFO . '/subscribe'));
         $request->setBodyParams(['params' => \json_encode($params)]);
 
-        $res = $this->send($request);
+        try {
+            $res = $this->send($request);
+        } catch (\Exception $e) {
+            $this->notify('something went wrong while subscribing to translate', ['level' => Notification::LVL_ERROR]);
+            unlink($config['subscribe_lock']);
+            return false;
+        }
         $res = \json_decode($res->getBody(), true);
 
         // creating the lock file
-        if ($res === true) {
-            $this->createLockFile($config['subscribe_lock']);
+        if ($res) {
+            return $res;
+        } else {
+            unlink($config['subscribe_lock']);
         }
-
-        return $res;
     }
 
     /**
@@ -617,6 +629,13 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     public function handleRequest($requestUri = null, $requestMethod = null)
     {
+        $config = $this->getConfig();
+        $skipSubscription = (isset($config['skipSubscription'])) ? (bool)$config['skipSubscription'] : false;
+
+        if ($skipSubscription) {
+            return $this;
+        }
+
         $pathInfo = $requestUri;
 
         if (false !== ($pos = strpos($pathInfo, '?'))) {
@@ -799,6 +818,16 @@ class Translate extends AbstractApiClient implements TranslateInterface
         }
     }
 
+    protected function domain($domain)
+    {
+        return null === $domain ? $this->getDomain() : $domain;
+    }
+
+    protected function lang($lang)
+    {
+        return null === $lang ? $this->getLang() : $lang;
+    }
+
     /**
      * Get the translation for the key $key in the domain $domain for the lang $lang
      *
@@ -810,26 +839,27 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     public function translate($key, $domain = null, $lang = null)
     {
-        $domain = null === $domain ? $this->getDomain() : $domain;
-        $lang = null === $lang ? $this->getLang() : $lang;
-
-        $this->checkTranslate($domain, $lang);
+        $domain = $this->domain($domain);
+        $lang = $this->lang($lang);
 
         $config = $this->getConfig();
-        $translations = $config['translations_path'] . $domain . '/' . $lang . '.php';
 
         $translated = $key;
         $found = false;
 
         // check if the file where the translations are stored exists for this namespace
-        if (is_file($translations)) {
-            $translations = include $translations;
+        if (isset($config['translations_path']) &&
+            is_file($config['translations_path'] . $domain . '/' . $lang . '.php')
+        ) {
+            $translations = include $config['translations_path'] . $domain . '/' . $lang . '.php';
+        } elseif (isset($config['localTranslationsFile']) && is_file($config['localTranslationsFile'])) {
+            $translations = include $config['localTranslationsFile'];
+        }
 
-            // the translation exists
-            if (isset($translations[$key])) {
-                $found = true;
-                $translated = $translations[$key];
-            }
+        // the translation exists
+        if (isset($translations[$key])) {
+            $found = true;
+            $translated = $translations[$key];
         }
 
         // translation not found, we log the warning
@@ -972,5 +1002,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
     {
         $this->response = $response;
         return $this;
+    }
+
+    protected function notify(string $message, $params = [])
+    {
+        if ($this->getLogger() instanceof Logger) {
+            $notification = new Notification($params);
+            $notification->setMessage($message);
+
+            $this->getLogger()->notify($notification);
+        }
     }
 }
