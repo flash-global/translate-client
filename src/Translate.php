@@ -273,14 +273,17 @@ class Translate extends AbstractApiClient implements TranslateInterface
             return;
         }
 
+        $config = $this->getConfig();
+
         $this->checkTransport();
 
-        $config = $this->getConfig();
         $servers = isset($config['servers']) ? $config['servers'] : null;
 
         if (is_null($servers)) {
             throw new TranslateException('No servers for update');
         }
+
+        $this->createLockFile($config['lock_file']);
 
         foreach ($servers as $server => $options) {
             $namespaces = (isset($options['namespaces']) && is_array($options['namespaces']))
@@ -291,8 +294,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
                 $this->fetchAllByServer($namespaces, $server);
             }
         }
-
-        $this->createLockFile($config['lock_file']);
     }
 
     /**
@@ -487,8 +488,12 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         $config = $this->getConfig();
 
+        if (!isset($config['subscribe_lock'])) {
+            $config['subscribe_lock'] = $config['lock_file'];
+        }
+
         // already subscribed
-        if (is_file($config['lock_file'])) {
+        if (is_file($config['subscribe_lock'])) {
             return true;
         }
 
@@ -520,7 +525,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
         // creating the lock file
         if ($res === true) {
-            $this->createLockFile($config['lock_file']);
+            $this->createLockFile($config['subscribe_lock']);
         }
 
         return $res;
