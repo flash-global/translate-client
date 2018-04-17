@@ -502,7 +502,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
             return true;
         }
 
-        $this->createLockFile($config['lock_file']);
+        $this->createLockFile($config['subscribe_lock']);
 
         $this->setBaseUrl($server);
         $this->checkTransport();
