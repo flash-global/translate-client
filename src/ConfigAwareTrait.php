@@ -11,6 +11,24 @@ trait ConfigAwareTrait
     protected $config = [];
 
     /**
+     * @var array
+     */
+    protected $mandatoryKeys = [
+        'lock_file',
+        'data_path',
+        'translations_path',
+        'url'
+    ];
+
+    /**
+     * @return array
+     */
+    public function getMandatoryKeys()
+    {
+        return $this->mandatoryKeys;
+    }
+
+    /**
      * Get Config
      *
      * @return array
@@ -70,21 +88,47 @@ trait ConfigAwareTrait
      * Validate the configuration
      *
      * @return bool
+     * @throws TranslateException
      */
     protected function validateConfig()
     {
+        $this->validateMandatoryConfig();
+        $this->setDefaultConfig();
+
+        return true;
+    }
+
+    /**
+     * Validate the mandatory configuration
+     *
+     * @return bool
+     * @throws TranslateException
+     */
+    protected function validateMandatoryConfig()
+    {
         $config = $this->getConfig();
+
         $skipSubscription = (isset($config['skipSubscription'])) ? (bool)$config['skipSubscription'] : false;
 
-        $mandatoryKeys = ['lock_file', 'data_path', 'translations_path', 'url'];
-
-        foreach ($mandatoryKeys as $key) {
+        foreach ($this->getMandatoryKeys() as $key) {
             if (!isset($config[$key]) && $skipSubscription === false) {
                 throw new TranslateException('The `' . $key . '` config must be specified!', 400);
             }
         }
 
         return true;
+    }
+
+    /**
+     * @return void
+     */
+    protected function setDefaultConfig()
+    {
+        $config = $this->config;
+
+        if (!isset($config['subscribe_lock'])) {
+            $config['subscribe_lock'] = $config['lock_file'];
+        }
     }
 
     /**

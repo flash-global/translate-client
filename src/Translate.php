@@ -273,14 +273,17 @@ class Translate extends AbstractApiClient implements TranslateInterface
             return;
         }
 
+        $config = $this->getConfig();
+
         $this->checkTransport();
 
-        $config = $this->getConfig();
         $servers = isset($config['servers']) ? $config['servers'] : null;
 
         if (is_null($servers)) {
             throw new TranslateException('No servers for update');
         }
+
+        $this->createLockFile($config['lock_file']);
 
         foreach ($servers as $server => $options) {
             $namespaces = (isset($options['namespaces']) && is_array($options['namespaces']))
@@ -291,8 +294,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
                 $this->fetchAllByServer($namespaces, $server);
             }
         }
-
-        $this->createLockFile($config['lock_file']);
     }
 
     /**
@@ -497,7 +498,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         }
 
         // already subscribed
-        if (is_file($config['lock_file'])) {
+        if (is_file($config['subscribe_lock'])) {
             return true;
         }
 
@@ -529,7 +530,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $res = $this->send($request);
         } catch (\Exception $e) {
             $this->notify('something went wrong while subscribing to translate', ['level' => Notification::LVL_ERROR]);
-            unlink($config['lock_file']);
+            unlink($config['subscribe_lock']);
             return false;
         }
         $res = \json_decode($res->getBody(), true);
@@ -538,7 +539,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         if ($res) {
             return $res;
         } else {
-            unlink($config['lock_file']);
+            unlink($config['subscribe_lock']);
         }
     }
 

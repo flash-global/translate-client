@@ -112,7 +112,7 @@ class TranslateTest extends Unit
     {
         $translate = Stub::construct(Translate::class, [], [
             'getConfig' => [
-              'lock_file' => dirname(__DIR__) . '/data/lock_file'
+              'subscribe_lock' => dirname(__DIR__) . '/data/lock_file'
             ],
             'importConfig' => Stub::once(),
             'checkWritableDirectories' => Stub::atLeastOnce(),
@@ -162,7 +162,8 @@ class TranslateTest extends Unit
             'getConfig' => Stub::once(function () {
                 return [
                     'url' => 'fake-url',
-                    'lock_file' => 'fake-lock_file'
+                    'lock_file' => 'fake-lock_file',
+                    'subscribe_lock' => 'fake-lock_file'
                 ];
             }),
             'send' => Stub::once(function () use ($responseMock) {
