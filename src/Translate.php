@@ -37,6 +37,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
 
+    private $staticCache = [];
+
     /**
      * @var bool
      */
@@ -744,8 +746,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $response = parent::send($request, $flags);
 
             if ($response instanceof ResponseDescriptor) {
-                //$body = \json_decode($response->getBody(), true);
-
                 return $response;
             }
         } catch (\Exception $e) {
@@ -829,6 +829,29 @@ class Translate extends AbstractApiClient implements TranslateInterface
     }
 
     /**
+     * @param string $domain
+     * @param string $lang
+     *
+     * @return array
+     */
+    protected function getTranslations($domain = null, $lang = null)
+    {
+        if (!isset($this->staticCache[$lang][$domain])) {
+            $config = $this->getConfig();
+
+            if (isset($config['translations_path']) && is_readable($config['translations_path'] . $domain . '/' . $lang . '.php')) {
+                $this->staticCache[$lang][$domain] = include $config['translations_path'] . $domain . '/' . $lang . '.php';
+            } elseif (isset($config['localTranslationsFile']) && is_readable($config['localTranslationsFile'])) {
+                $this->staticCache[$lang][$domain] = include $config['localTranslationsFile'];
+            } else {
+                throw new TranslateException('No domain or lang founded');
+            }
+        }
+
+        return $this->staticCache[$lang][$domain];
+    }
+
+    /**
      * Get the translation for the key $key in the domain $domain for the lang $lang
      *
      * @param $key
@@ -842,27 +865,16 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $domain = $this->domain($domain);
         $lang = $this->lang($lang);
 
-        $config = $this->getConfig();
-
         $translated = $key;
         $found = false;
 
-        // check if the file where the translations are stored exists for this namespace
-        if (isset($config['translations_path']) &&
-            is_file($config['translations_path'] . $domain . '/' . $lang . '.php')
-        ) {
-            $translations = include $config['translations_path'] . $domain . '/' . $lang . '.php';
-        } elseif (isset($config['localTranslationsFile']) && is_file($config['localTranslationsFile'])) {
-            $translations = include $config['localTranslationsFile'];
-        }
+        $translations = $this->getTranslations($domain, $lang);
 
-        // the translation exists
         if (isset($translations[$key])) {
             $found = true;
             $translated = $translations[$key];
         }
 
-        // translation not found, we log the warning
         if ($this->logOnMissingTranslation && false === $found && $this->getLogger() instanceof Logger) {
             $notif = new Notification([
                 'message' => 'Translation not found!',
