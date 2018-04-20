@@ -139,7 +139,7 @@ class TranslateTest extends TestCase
 
     public function testSubscribeWhenServerIsSetButNoUrlSetInTheConfig()
     {
-        $translate = Stub::construct(Translate::class, [], [
+        $translate = Stub::make(Translate::class, [], [
             'setBaseUrl' => Stub::once(),
             'checkTransport' => Stub::once(),
             'importConfig' => Stub::once(),
