@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  php:
+    hostname: ${USER}:translate_client_php
+    build:
+      context: ./
+      dockerfile: ./Docker/Dockerfile
+    ports:
+      - "9000"
+    volumes:
+      - .:/var/www/html
