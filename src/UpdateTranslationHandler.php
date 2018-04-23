@@ -141,12 +141,6 @@ class UpdateTranslationHandler
      */
     protected function copyFile($source, $dest)
     {
-        // renaming the old one
-        //if (is_file($dest)) {
-        //    rename($dest, $dest . '.' . time());
-        //}
-
-        // copy the new one
         copy($source, $dest);
 
         return $this;
@@ -161,6 +155,7 @@ class UpdateTranslationHandler
     protected function rmdir($dir)
     {
         $files = array_diff(scandir($dir), ['.', '..']);
+
         foreach ($files as $file) {
             (is_dir("$dir/$file")) ? $this->rmdir("$dir/$file") : unlink("$dir/$file");
         }
