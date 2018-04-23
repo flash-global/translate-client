@@ -643,7 +643,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
     public function emit()
     {
         if (headers_sent($file, $line)) {
-            throw new \LogicException('Headers already sent in %s on line %d', $file, $line);
+            throw new \LogicException(sprintf('Headers already sent in %s on line %d', $file, $line));
         }
         if ($this->getResponse()) {
             (new Response\SapiEmitter())->emit($this->getResponse());
