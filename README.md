@@ -51,6 +51,11 @@ $translate->setTransport(new BasicTransport());
 
 Running Beanstalkd is very simple. However, you must pay attention to the `z` option which set the maximum job (or message) size in bytes. So, if you want send multiple translations to Translate API, you should allow enough bytes according to the length of your translations.
 
+#### Launch Unit test
+
+Start the docker with `docker-compose up -d`
+
+Then `docker exec -ti translateclient_php_1 /var/html/vendor/bin/codecept run unit` 
 
 #### Run `api-client-worker.php`
 

@@ -8,10 +8,6 @@ parameters:
         phplint: ~
         phpcs:
             encoding: UTF-8
-            standard: PSR2
-            whitelist_patterns:
-                - /^src\/(.*)/
-                - /^tests\/(unit|functional|acceptance)\/(.*)/
         phpcpd:
             exclude: ['vendor']
         phpmd:
