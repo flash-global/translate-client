@@ -1003,7 +1003,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
         return $this;
     }
 
-    protected function notify(string $message, $params = [])
+    /**
+     * @param string $message
+     * @param array $params
+     */
+    protected function notify($message, $params = [])
     {
         if ($this->getLogger() instanceof Logger) {
             $notification = new Notification($params);
