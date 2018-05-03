@@ -17,6 +17,8 @@ use Fei\Service\Translate\Client\Translate;
 use Fei\Service\Translate\Client\Utils\ArrayCollection;
 use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use ZipArchive;
@@ -26,11 +28,11 @@ use ZipArchive;
  *
  * @package Tests\Fei\Service\Translate\Client
  */
-class TranslateTest extends Unit
+class TranslateTest extends TestCase
 {
     public function testConstructorWhenConfigFileNotFound()
     {
-        $this->expectException(TranslateException::class);
+        $this->setExpectedException(TranslateException::class);
 
         Stub::construct(Translate::class, [], [
             'getConfigFilePath' => 'fake-path'
@@ -84,8 +86,8 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->fetchOne(1);
     }
@@ -137,7 +139,7 @@ class TranslateTest extends Unit
 
     public function testSubscribeWhenServerIsSetButNoUrlSetInTheConfig()
     {
-        $translate = Stub::construct(Translate::class, [], [
+        $translate = Stub::make(Translate::class, [], [
             'setBaseUrl' => Stub::once(),
             'checkTransport' => Stub::once(),
             'importConfig' => Stub::once(),
@@ -258,8 +260,8 @@ class TranslateTest extends Unit
             }),
         ]);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Call url not configured in the config file!');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Call url not configured in the config file!');
 
         $translate->unsubscribe();
     }
@@ -270,7 +272,7 @@ class TranslateTest extends Unit
 
         $data = $this->getValidI18nString()->toArray();
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->withConsecutive(
             [
                 $this->callback(function (RequestDescriptor $requestDescriptor) use (&$request1) {
@@ -305,7 +307,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -337,8 +339,8 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->store(new I18nString());
     }
@@ -347,7 +349,7 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
         $string = new I18nString();
@@ -356,7 +358,7 @@ class TranslateTest extends Unit
             ->setKey('KEY')
             ->setContent('Content');
 
-        $this->expectException(TranslateException::class);
+        $this->setExpectedException(TranslateException::class);
         $translate->update($string);
     }
 
@@ -364,13 +366,13 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
         $string = 'string';
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('You have to send an I18nString entity!');
+        $this->setExpectedException(Exception::class);
+        //$this->setExpectedExceptionMessage('You have to send an I18nString entity!');
         $translate->update($string);
     }
 
@@ -381,7 +383,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -414,8 +416,7 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
 
         $translate->update(new I18nString());
     }
@@ -424,8 +425,7 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
 
         $translate->delete(new I18nString());
     }
@@ -437,7 +437,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -466,7 +466,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -495,7 +495,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -520,12 +520,10 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Bad request: the parameter hs to be a valid `key`, `id`, `entity` or `Pattern`');
-        $this->expectExceptionCode(400);
+        $this->setExpectedException(TranslateException::class, null, 400);
 
         $translate->delete(new \stdClass());
     }
@@ -534,8 +532,8 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->search(Pattern::contains('fake-content'));
     }
@@ -549,7 +547,7 @@ class TranslateTest extends Unit
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $transport, $data) {
                 $request = $requestDescriptor;
@@ -571,8 +569,8 @@ class TranslateTest extends Unit
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Transport has to be set');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->find('KEY');
     }
@@ -586,7 +584,7 @@ class TranslateTest extends Unit
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -613,7 +611,7 @@ class TranslateTest extends Unit
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -640,7 +638,7 @@ class TranslateTest extends Unit
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -666,7 +664,7 @@ class TranslateTest extends Unit
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->createMock(SyncTransportInterface::class);
+        $transport = $this->getMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -718,8 +716,8 @@ class TranslateTest extends Unit
 
     public function testGetClientWhenItHasNotBeenSet()
     {
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('Client has to be set before using it!');
+        $this->setExpectedException(TranslateException::class);
+        //$this->setExpectedExceptionMessage('Client has to be set before using it!');
         Translate::getClient();
     }
 
@@ -756,195 +754,152 @@ class TranslateTest extends Unit
         $this->assertAttributeEquals($fakeLogger, 'logger', $translate);
     }
 
-    public function testTranslateWhenGivenDomainIsNotValid()
+    public function testGetTranslationsException()
     {
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => false,
-            'notify' => Stub::once()
-        ]);
+        $fixtureConfig = [];
 
-        $translate->translate('KEY', 'a/b');
+        $fixtureDomain = 'domain';
+        $fixtureLang = 'fr_FR';
+
+        $this->setExpectedException(TranslateException::class);
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getConfig'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->invokeNonPublicMethod($translate, 'getTranslations', [$fixtureDomain, $fixtureLang]);
     }
 
-    public function testTranslateWhenGivenLangIsNotValid()
+    public function testGetTranslationsWithPath()
     {
-        $translate = Stub::make(Translate::class, [
-            'isLang' => false,
-            'isDomain' => true,
-            'notify' => Stub::once()
-        ]);
+        $expectedKeys = [
+            'KEY' => 'Value'
+        ];
 
-        $translate->translate('KEY', 'a/b', 'fr_from_france');
+        $fixtureConfig = [
+            'translations_path' => dirname(__DIR__) . '/data/translate/one/',
+        ];
+
+
+        $fixtureDomain = 'domain';
+        $fixtureLang = 'fr_FR';
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getConfig'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertEquals($expectedKeys, $this->invokeNonPublicMethod($translate, 'getTranslations', [$fixtureDomain, $fixtureLang]));
     }
 
-    public function testTranslateWhenTranslationFileIsMissing()
+    public function testGetTranslationsWithLocalFile()
     {
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getConfig' => [
-                'translations_path' => 'fake-path'
-            ],
-        ]);
+        $expectedKeys = [
+            'KEY' => 'Value'
+        ];
 
-        $translated = $translate->translate('KEY');
+        $fixtureConfig = [
+            'localTranslationsFile' => dirname(__DIR__) . '/data/translate/one/domain/fr_FR.php',
+        ];
 
-        $this->assertEquals('KEY', $translated);
+
+        $fixtureDomain = 'domain';
+        $fixtureLang = 'fr_FR';
+
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getConfig'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $this->assertEquals($expectedKeys, $this->invokeNonPublicMethod($translate, 'getTranslations', [$fixtureDomain, $fixtureLang]));
     }
 
-    public function testTranslateWhenTranslationFileExistsAndKeyIsNotInItAndLoggerNotConfigured()
+    /**
+     * @depends testGetTranslationsWithLocalFile
+     * @depends testGetTranslationsWithPath
+     * @depends testGetTranslationsException
+     */
+    public function testTranslateNotFound()
     {
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-        ]);
+        $fixtureDomain = '/toto';
+        $fixtureLang = 'fr_FR';
+        $fixtureKey = 'Hello';
 
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+        /** @var Translate|MockObject $translate */
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getTranslations', 'domain', 'lang'])
+            ->getMock();
 
-        $this->assertEquals('KEY_FAKE', $translated);
+        $translate->expects($this->once())
+            ->method('domain')
+            ->with($fixtureDomain)
+            ->willReturn($fixtureDomain);
+
+        $translate->expects($this->once())
+            ->method('lang')
+            ->with($fixtureLang)
+            ->willReturn($fixtureLang);
+
+        $translate->expects($this->once())
+            ->method('getTranslations')
+            ->with($fixtureDomain, $fixtureLang)
+            ->willReturn([]);
+
+        $this->assertEquals($fixtureKey, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
     }
 
-    public function testTranslateWhenTranslationFileExistsAndKeyIsNotInItAndLoggerIsConfigured()
+    /**
+     * @depends testGetTranslationsWithLocalFile
+     * @depends testGetTranslationsWithPath
+     * @depends testGetTranslationsException
+     */
+    public function testTranslate()
     {
-        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
-        $fakeLogger->expects($this->once())->method('notify')->willReturn(null);
+        $fixtureDomain = '/toto';
+        $fixtureLang = 'fr_FR';
+        $fixtureKey = 'Hello';
+        $expected = 'Bonjour';
 
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getLogger' => $fakeLogger,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-            'validateConfig' => true,
-            'initDispatcher' => null,
-        ]);
+        $fixtureTranslation = [
+            'Hello' => $expected
+        ];
 
-        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+        /** @var Translate|MockObject $translate */
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getTranslations', 'domain', 'lang'])
+            ->getMock();
 
-        $this->assertEquals('KEY_FAKE', $translated);
-    }
+        $translate->expects($this->once())
+            ->method('domain')
+            ->with($fixtureDomain)
+            ->willReturn($fixtureDomain);
 
-    public function testTranslateWhenLogOnMissingTranslationIsFalse()
-    {
-        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
-        $fakeLogger->expects($this->never())->method('notify');
+        $translate->expects($this->once())
+            ->method('lang')
+            ->with($fixtureLang)
+            ->willReturn($fixtureLang);
 
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getLogger' => $fakeLogger,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-            'validateConfig' => true,
-            'initDispatcher' => null,
-        ]);
-        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => false]);
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
+        $translate->expects($this->once())
+            ->method('getTranslations')
+            ->with($fixtureDomain, $fixtureLang)
+            ->willReturn($fixtureTranslation);
 
-        $this->assertEquals('KEY_FAKE', $translated);
-    }
-
-    public function testTranslateWhenLogOnMissingTranslationIsTrue()
-    {
-        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
-        $fakeLogger->expects($this->once())->method('notify');
-
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getLogger' => $fakeLogger,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-            'validateConfig' => true,
-            'initDispatcher' => null,
-        ]);
-        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
-
-        $this->assertEquals('KEY_FAKE', $translated);
-    }
-
-    public function testTranslateWhenLogLevelDefault()
-    {
-        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
-        $fakeLogger->expects($this->once())->method('notify')->with(new Notification([
-            'message' => 'Translation not found!',
-            'level' => Notification::LVL_DEBUG,
-            'context' => [
-                'key' => 'KEY_FAKE',
-                'domain' => '/one/domain',
-                'lang' => 'fr_FR'
-            ]
-        ]));
-
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getLogger' => $fakeLogger,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-            'validateConfig' => true,
-            'initDispatcher' => null,
-        ]);
-        $translate->__construct([Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true]);
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
-
-        $this->assertEquals('KEY_FAKE', $translated);
-    }
-
-    public function testTranslateWhenLogLevelWarning()
-    {
-        $fakeLogger = $this->getMockBuilder(Logger::class)->setMethods(['notify'])->getMock();
-        $fakeLogger->expects($this->once())->method('notify')->with(new Notification([
-            'message' => 'Translation not found!',
-            'level' => Notification::LVL_WARNING,
-            'context' => [
-                'key' => 'KEY_FAKE',
-                'domain' => '/one/domain',
-                'lang' => 'fr_FR'
-            ]
-        ]));
-
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getLogger' => $fakeLogger,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-            'validateConfig' => true,
-            'initDispatcher' => null,
-        ]);
-        $translate->__construct([
-            Translate::OPTION_LOG_ON_MISSING_TRANSLATION => true,
-            Translate::OPTION_LOG_LEVEL => Notification::LVL_WARNING
-        ]);
-        $translated = $translate->translate('KEY_FAKE', '/one/domain', 'fr_FR');
-
-        $this->assertEquals('KEY_FAKE', $translated);
-    }
-
-    public function testTranslateWhenTranslationFileExistsAndKeyIsPresnet()
-    {
-        $translate = Stub::make(Translate::class, [
-            'isDomain' => true,
-            'isLang' => true,
-            'getConfig' => [
-                'translations_path' => dirname(__DIR__) . '/data/translate'
-            ],
-        ]);
-
-        $translated = $translate->translate('KEY', '/one/domain', 'fr_FR');
-
-        $this->assertEquals('Value', $translated);
+        $this->assertEquals($expected, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
     }
 
     public function testDispatcherAccessors()
@@ -991,8 +946,8 @@ class TranslateTest extends Unit
         $this->assertNull($res);
 
         $i18nString->setContent('');
-        $this->expectException(ValidationException::class);
-        $this->expectExceptionMessage('I18nString entity is not valid: (content: Content cannot be empty)');
+        $this->setExpectedException(ValidationException::class);
+        //$this->setExpectedExceptionMessage('I18nString entity is not valid: (content: Content cannot be empty)');
         $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18nString]);
     }
 
@@ -1077,7 +1032,10 @@ class TranslateTest extends Unit
             'lock_file' => $fixtureFile
         ];
 
-        $translate = $this->createMock(Translate::class);
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['getConfig'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $translate->expects($this->once())
             ->method('getConfig')
@@ -1095,7 +1053,10 @@ class TranslateTest extends Unit
             'lock_file' => $fixtureFile
         ];
 
-        $translate = $this->createMock(Translate::class);
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['getConfig'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $translate->expects($this->once())
             ->method('getConfig')
@@ -1114,7 +1075,10 @@ class TranslateTest extends Unit
             'lock_file' => $fixtureFile
         ];
 
-        $translate = $this->createMock(Translate::class);
+        $translate = $this->getMockBuilder(Translate::class)
+            ->setMethods(['getConfig'])
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $translate->expects($this->once())
             ->method('getConfig')
@@ -1182,7 +1146,7 @@ class TranslateTest extends Unit
 
         $fixtureBodyJson = '["test"]';
 
-        $requestDescriptorMock = $this->createMock(ResponseDescriptor::class);
+        $requestDescriptorMock = $this->getMock(ResponseDescriptor::class);
 
         $bodyMock = $this->getMockBuilder(ResponseInterface::class)
             ->setMethods(['getContents'])
@@ -1267,8 +1231,7 @@ class TranslateTest extends Unit
             ->method('getConfig')
             ->willReturn([]);
 
-        $this->expectException(TranslateException::class);
-        $this->expectExceptionMessage('No servers for update');
+        $this->setExpectedException(TranslateException::class);
 
         $translate->fetchAll();
     }

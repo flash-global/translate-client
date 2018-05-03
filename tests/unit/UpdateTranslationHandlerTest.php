@@ -51,7 +51,7 @@ class UpdateTranslationHandlerTest extends Unit
             'importArchive' => Stub::never()
         ]);
 
-        $this->expectException(TranslateException::class);
+        $this->setExpectedException(TranslateException::class);
 
         $_POST['body'] = 'fake-body';
         $handler->__construct([]);
@@ -88,7 +88,7 @@ class UpdateTranslationHandlerTest extends Unit
 
         $body = base64_encode(file_get_contents($path . '/one.zip'));
         $this->invokeNonPublicMethod($handler, 'importArchive', [$path, $body]);
-        $this->assertDirectoryExists($path . '/tmp_path');
+        $this->assertFileExists($path . '/tmp_path');
         $this->invokeNonPublicMethod($handler, 'rmdir', [$path . '/tmp_path']);
     }
 
@@ -120,7 +120,7 @@ class UpdateTranslationHandlerTest extends Unit
 
         $this->invokeNonPublicMethod($handler, 'createDirectory', [$dir]);
 
-        $this->assertDirectoryExists($dir);
+        $this->assertFileExists($dir);
         $this->invokeNonPublicMethod($handler, 'rmdir', [$dir]);
     }
 
@@ -180,13 +180,16 @@ class UpdateTranslationHandlerTest extends Unit
         file_put_contents($base . '/a/b/c/file.txt', 'file');
         file_put_contents($base . '/a/b/c/d/file.txt', 'file');
 
-        $handler = Stub::make(UpdateTranslationHandler::class, [
-            'importConfig' => true
-        ]);
 
-        $this->assertDirectoryExists($dir);
+
+        $handler = $this->getMockBuilder(UpdateTranslationHandler::class)
+            ->disableOriginalConstructor()
+            ->setMethods(null)
+            ->getMock();
+
+        $this->assertFileExists($dir);
         $this->invokeNonPublicMethod($handler, 'rmdir', [$base . '/a']);
-        $this->assertDirectoryNotExists($dir);
+        $this->assertFileNotExists($dir);
     }
 
     protected function invokeNonPublicMethod($object, $name, array $args = [])
