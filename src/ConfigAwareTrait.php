@@ -124,10 +124,8 @@ trait ConfigAwareTrait
      */
     protected function setDefaultConfig()
     {
-        $config = $this->config;
-
-        if (!isset($config['subscribe_lock'])) {
-            $config['subscribe_lock'] = $config['lock_file'];
+        if (!isset($this->config['subscribe_lock'])) {
+            $this->config['subscribe_lock'] = $this->config['lock_file'];
         }
     }
 
