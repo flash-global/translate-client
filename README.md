@@ -8,6 +8,7 @@
     - [Runtime](#runtime)
 - [Step by step installation](#step-by-step-installation)
     - [Initialization](#initialization)
+    - [Configuration](#configuration)
     - [Settings](#settings)
     - [Known issues](#known-issues)
 - [Contribution](#contribution)
@@ -36,6 +37,17 @@ easily
 ```git clone https://github.com/flash-global/translate-client.git```
 - Run Composer depedencies installation
 ```composer install```
+
+### Configuration
+
+The Translate client needs some options to work properly. The available options that can be passed to the `__construct()` or `setOptions()` methods are :
+
+
+| Option           | Description                                                                | Type   | Possible Values                                | Default                 |
+|------------------|----------------------------------------------------------------------------|--------|------------------------------------------------|-------------------------|
+| OPTION_BASEURL   | This is the server to which send the requests.                             | string | Any URL, including protocol but excluding path | --                      |
+| OPTION_HEADER_AUTHORIZATION    | Api Key for authentification                                               | string | Any string value                               | ''                      |
+
 
 ### Settings
 

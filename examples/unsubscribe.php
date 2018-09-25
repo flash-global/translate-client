@@ -6,10 +6,16 @@ use Fei\Service\Translate\Client\Translate;
 use Fei\ApiClient\Transport\BasicTransport;
 
 try {
-    $logger = new Logger([Logger::OPTION_BASEURL => 'http://logger.dev']);
+    $logger = new Logger([
+        Logger::OPTION_BASEURL => 'http://logger.dev',
+        Logger::OPTION_HEADER_AUTHORIZATION => 'key'
+    ]);
     $logger->setTransport(new BasicTransport());
 
-    $translate = new Translate([Translate::OPTION_BASEURL => 'http://translate.dev']);
+    $translate = new Translate([
+        Translate::OPTION_BASEURL => 'http://translate.dev',
+        Translate::OPTION_HEADER_AUTHORIZATION => 'key'
+    ]);
     $translate->setTransport(new BasicTransport());
     $translate->setLogger($logger);
 

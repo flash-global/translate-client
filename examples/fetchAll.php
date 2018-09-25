@@ -5,7 +5,10 @@ use Fei\Service\Translate\Client\Translate;
 use Fei\ApiClient\Transport\BasicTransport;
 
 try {
-    $translate = new Translate([Translate::OPTION_BASEURL => 'http://translate.dev']);
+    $translate = new Translate([
+        Translate::OPTION_BASEURL => 'http://translate.dev',
+        Translate::OPTION_HEADER_AUTHORIZATION => 'key'
+    ]);
     $translate->setTransport(new BasicTransport());
     $translate->fetchAll();
 } catch (\Exception $e) {
