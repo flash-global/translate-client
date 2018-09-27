@@ -26,15 +26,15 @@
   "repositories": [
     {
       "type" : "git",
-      "url" : "git@github.com:flash-global/api-client"
+      "url" : "https://github.com/flash-global/api-client"
     },
     {
       "type" : "git",
-      "url" : "git@github.com:flash-global/logger-client"
+      "url" : "https://github.com/flash-global/logger-client"
     },
     {
       "type" : "git",
-      "url" : "git@github.com:flash-global/translate-common"
+      "url" : "https://github.com/flash-global/translate-common"
     }
   ],
   "require": {
