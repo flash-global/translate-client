@@ -23,20 +23,6 @@
       "src/functions.php"
     ]
   },
-  "repositories": [
-    {
-      "type" : "git",
-      "url" : "https://github.com/flash-global/api-client"
-    },
-    {
-      "type" : "git",
-      "url" : "https://github.com/flash-global/logger-client"
-    },
-    {
-      "type" : "git",
-      "url" : "https://github.com/flash-global/translate-common"
-    }
-  ],
   "require": {
     "php": ">=5.5",
     "fei/api-client": "^1.1",

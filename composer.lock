@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a1cbed0fa3958ca22a552f6f3befb87f",
+    "content-hash": "8b5d608b33a9075fe1d6dc23b507281b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -409,7 +409,7 @@
             "version": "v1.3.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/flash-global/api-client",
+                "url": "https://github.com/flash-global/api-client.git",
                 "reference": "f925992cbda504a466a8cb36f0e7f509a4a5b53f"
             },
             "require": {
@@ -490,7 +490,7 @@
             "version": "v1.2.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/flash-global/logger-client",
+                "url": "https://github.com/flash-global/logger-client.git",
                 "reference": "32ba2bedf3e864aab2f9514264a69629ec815af8"
             },
             "require": {
@@ -573,7 +573,7 @@
             "version": "v1.0.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/flash-global/translate-common",
+                "url": "https://github.com/flash-global/translate-common.git",
                 "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25"
             },
             "require": {
