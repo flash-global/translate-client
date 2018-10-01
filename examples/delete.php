@@ -7,7 +7,10 @@ use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
 
 try {
-    $translate = new Translate([Translate::OPTION_BASEURL => 'http://translate.dev']);
+    $translate = new Translate([
+        Translate::OPTION_BASEURL => 'http://translate.dev',
+        Translate::OPTION_HEADER_AUTHORIZATION => 'key'
+    ]);
 
     $translate->setTransport(new BasicTransport());
     $key = 'TRANSLATION_' . time();
@@ -28,7 +31,6 @@ try {
 
     $translate->delete(Pattern::begins('Hello'));
     $translate->delete($key);
-
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
     $previous = $e->getPrevious();

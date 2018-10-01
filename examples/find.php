@@ -6,7 +6,10 @@ use Fei\ApiClient\Transport\BasicTransport;
 use Fei\Service\Translate\Entity\I18nString;
 
 try {
-    $translate = new Translate([Translate::OPTION_BASEURL => 'http://translate.dev']);
+    $translate = new Translate([
+        Translate::OPTION_BASEURL => 'http://translate.dev',
+        Translate::OPTION_HEADER_AUTHORIZATION => 'key'
+    ]);
 
     $translate->setTransport(new BasicTransport());
 
@@ -21,7 +24,7 @@ try {
     $ids = $translate->store($values);
 
     $string = $translate->find('lkjh', 'kjlh', 'lkjh');
-var_dump($string);die;
+    
     echo $string;
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
