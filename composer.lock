@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad2849a912a42e98685ac46232360b94",
+    "content-hash": "8b5d608b33a9075fe1d6dc23b507281b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -409,7 +409,7 @@
             "version": "v1.3.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:flash-global/api-client",
+                "url": "https://github.com/flash-global/api-client.git",
                 "reference": "f925992cbda504a466a8cb36f0e7f509a4a5b53f"
             },
             "require": {
@@ -490,14 +490,8 @@
             "version": "v1.2.11",
             "source": {
                 "type": "git",
-                "url": "git@github.com:flash-global/logger-client",
+                "url": "https://github.com/flash-global/logger-client.git",
                 "reference": "32ba2bedf3e864aab2f9514264a69629ec815af8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/logger-client/zipball/32ba2bedf3e864aab2f9514264a69629ec815af8",
-                "reference": "32ba2bedf3e864aab2f9514264a69629ec815af8",
-                "shasum": ""
             },
             "require": {
                 "fei/api-client": "^1.1.0",
@@ -514,7 +508,6 @@
                     "Fei\\Service\\Logger\\Client\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],
@@ -580,14 +573,8 @@
             "version": "v1.0.4",
             "source": {
                 "type": "git",
-                "url": "git@github.com:flash-global/translate-common",
+                "url": "https://github.com/flash-global/translate-common.git",
                 "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/flash-global/translate-common/zipball/4beca7c1007571a5fbb0c81580bf65978de32c25",
-                "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25",
-                "shasum": ""
             },
             "require": {
                 "fei/entities": "^1.0.3",
@@ -602,7 +589,6 @@
                     "Fei\\Service\\Translate\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
                     "name": "Vincent Simonin",
