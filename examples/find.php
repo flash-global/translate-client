@@ -24,8 +24,7 @@ try {
     $ids = $translate->store($values);
 
     $string = $translate->find('lkjh', 'kjlh', 'lkjh');
-    var_dump($string);
-    die;
+    
     echo $string;
 } catch (\Exception $e) {
     echo $e->getMessage() . PHP_EOL;
