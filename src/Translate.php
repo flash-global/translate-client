@@ -819,7 +819,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         } elseif (isset($config['localTranslationsFile']) && is_readable($config['localTranslationsFile'])) {
             $this->staticCache[$domain][$lang] = include $config['localTranslationsFile'];
         } else {
-            throw new TranslateException(sprintf('No domain "%s" or lang "%s" founded', $domain, $lang));
+            throw new TranslateException(sprintf('No domain "%s" or language "%s" found', $domain, $lang));
         }
     }
 
