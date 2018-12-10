@@ -197,8 +197,12 @@ class Translate extends AbstractApiClient implements TranslateInterface
     protected function manageUpdateFile($data)
     {
         $config = $this->getConfig();
+        
+        if (!is_dir($config['translations_path'])) {
+            mkdir($config['translations_path'], 0777, true);
+        }
+        
         $filePath = $config['translations_path'] . '/update.zip';
-
         file_put_contents($filePath, base64_decode($data));
 
         $zip = new ZipArchive();
