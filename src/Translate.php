@@ -853,6 +853,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     public function translate($key, $domain = null, $lang = null)
     {
+        $config = $this->getConfig();
+
         $domain = $this->domain($domain);
         $lang = $this->lang($lang);
 
@@ -860,6 +862,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $found = false;
 
         $translations = $this->getTranslations($domain, $lang);
+
+        if($config["sanitizedKeys"]) {
+            $key = trim(strtolower($key));
+        }
 
         if (isset($translations[$key])) {
             $found = true;
