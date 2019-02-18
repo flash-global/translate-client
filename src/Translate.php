@@ -860,7 +860,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $found = false;
 
         $translations = $this->getTranslations($domain, $lang);
-        $sanitizedKeys = isset($config['sanitizedKeys']) ? $config['sanitizedKeys'] : false;
+        $sanitizedKeys = $config['sanitizedKeys'] ?? false;
         if ($sanitizedKeys) {
             $key = trim(strtolower($key));
         }
