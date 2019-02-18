@@ -12,5 +12,5 @@ return [
         ]
     ],
     'url' => 'http://10.6.0.1:8040/examples/handleRequest.php/update',
-    'sanitizedKeys' => true
+    'sanitizedKeys' => false
 ];
