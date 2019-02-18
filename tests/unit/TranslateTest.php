@@ -911,8 +911,11 @@ class TranslateTest extends TestCase
     {
         $fixtureDomain = '/toto';
         $fixtureLang = 'fr_FR';
-        $fixtureKey = 'hello';
+        $fixtureKey = '   Hello ';
         $expected = 'Bonjour';
+        $fixtureConfig = [
+            'sanitizedKeys' => true
+        ];
 
         $fixtureTranslation = [
             'hello' => $expected
@@ -933,6 +936,10 @@ class TranslateTest extends TestCase
             ->method('lang')
             ->with($fixtureLang)
             ->willReturn($fixtureLang);
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
 
         $translate->expects($this->once())
             ->method('getTranslations')
