@@ -902,6 +902,53 @@ class TranslateTest extends TestCase
         $this->assertEquals($expected, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
     }
 
+    /**
+     * @depends testGetTranslationsWithLocalFile
+     * @depends testGetTranslationsWithPath
+     * @depends testGetTranslationsException
+     */
+    public function testSanitizedKeyTranslate()
+    {
+        $fixtureDomain = '/toto';
+        $fixtureLang = 'fr_FR';
+        $fixtureKey = '   Hello ';
+        $expected = 'Bonjour';
+        $fixtureConfig = [
+            'sanitizedKeys' => true
+        ];
+
+        $fixtureTranslation = [
+            'hello' => $expected
+        ];
+
+        /** @var Translate|MockObject $translate */
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getTranslations', 'domain', 'lang', 'getConfig'])
+            ->getMock();
+
+        $translate->expects($this->once())
+            ->method('domain')
+            ->with($fixtureDomain)
+            ->willReturn($fixtureDomain);
+
+        $translate->expects($this->once())
+            ->method('lang')
+            ->with($fixtureLang)
+            ->willReturn($fixtureLang);
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn($fixtureConfig);
+
+        $translate->expects($this->once())
+            ->method('getTranslations')
+            ->with($fixtureDomain, $fixtureLang)
+            ->willReturn($fixtureTranslation);
+
+        $this->assertEquals($expected, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
+    }
+
     public function testDispatcherAccessors()
     {
         $dispatcherMock = $this->getMockBuilder(Dispatcher::class)->getMock();
