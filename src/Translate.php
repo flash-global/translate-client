@@ -843,6 +843,16 @@ class Translate extends AbstractApiClient implements TranslateInterface
     }
 
     /**
+     * @param $key
+     *
+     * @return string
+     */
+    protected function sanitizeKey($key)
+    {
+        return trim(strtolower($key));
+    }
+
+    /**
      * Get the translation for the key $key in the domain $domain for the lang $lang
      *
      * @param $key
@@ -862,12 +872,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $translations = $this->getTranslations($domain, $lang);
         $sanitizedKeys = $config['sanitizedKeys'] ?? false;
         if ($sanitizedKeys) {
-            $key = trim(strtolower($key));
+            $key = $this->sanitizeKey($key);
         }
 
         if (isset($translations[$key])) {
             $found = true;
             $translated = $translations[$key];
+        } elseif (!$sanitizedKeys && isset($translations[$this->sanitizeKey($key)])) {
+            $found = true;
+            $translated = $translations[$this->sanitizeKey($key)];
         }
 
         if ($this->logOnMissingTranslation && false === $found && $this->getLogger() instanceof Logger) {
