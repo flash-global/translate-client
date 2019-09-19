@@ -1053,7 +1053,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
      *
      * @return $this
      */
-    public function setFallbackLanguage($fallbackLanguage)
+    public function setFallbackLanguage(string $fallbackLanguage)
     {
         $this->fallbackLanguage = $fallbackLanguage;
 
