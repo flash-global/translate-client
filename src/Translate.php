@@ -36,6 +36,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
     const API_TRANSLATE_PATH_UPDATE = '/api/translation-cache';
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
+    const LANG_GB = 'en_GB';
 
     protected $staticCache = [];
 
@@ -53,6 +54,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @var string
      */
     protected $lang;
+
+    /**
+     * @var string
+     */
+    protected $fallbackLanguage = self::LANG_GB;
 
     /**
      * @var string
@@ -869,7 +875,25 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $translated = $key;
         $found = false;
 
-        $translations = $this->getTranslations($domain, $lang);
+        try {
+            $translations = $this->getTranslations($domain, $lang);
+        } catch (TranslateException $translateException) {
+            $translations = $this->getTranslations($domain, $this->fallbackLanguage);
+
+            $notif = new Notification([
+                'message' => 'Language is not available for translation',
+                'level' => Notification::LVL_INFO,
+                'context' => [
+                    'key' => $key,
+                    'domain' => $domain,
+                    'lang' => $lang,
+                    'fallbackLang' => $this->fallbackLanguage,
+                ]
+            ]);
+            $lang = $this->fallbackLanguage;
+            $this->getLogger()->notify($notif);
+        }
+
         $sanitizedKeys = $config['sanitizedKeys'] ?? false;
         if ($sanitizedKeys) {
             $key = $this->sanitizeKey($key);
@@ -1023,6 +1047,19 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $this->response = $response;
         return $this;
     }
+
+    /**
+     * @param string $fallbackLanguage
+     *
+     * @return $this
+     */
+    public function setFallbackLanguage($fallbackLanguage)
+    {
+        $this->fallbackLanguage = $fallbackLanguage;
+
+        return $this;
+    }
+
 
     /**
      * @param string $message

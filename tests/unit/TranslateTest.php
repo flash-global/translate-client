@@ -2,7 +2,6 @@
 
 namespace Tests\Fei\Service\Translate\Client;
 
-use Codeception\Test\Unit;
 use Codeception\Util\Stub;
 use FastRoute\Dispatcher;
 use Fei\ApiClient\RequestDescriptor;
@@ -19,7 +18,6 @@ use Fei\Service\Translate\Client\Utils\Pattern;
 use Fei\Service\Translate\Entity\I18nString;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use ZipArchive;
 
@@ -897,6 +895,68 @@ class TranslateTest extends TestCase
         $translate->expects($this->once())
             ->method('getTranslations')
             ->with($fixtureDomain, $fixtureLang)
+            ->willReturn($fixtureTranslation);
+
+        $this->assertEquals($expected, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
+    }
+
+    public function testTranslateWithFallbackLanguage()
+    {
+        $fixtureDomain = '/toto';
+        $fixtureLang = 'fr_FR';
+        $fallbackLang =  'en_GB';
+        $fixtureKey = 'Hello';
+        $expected = 'Bonjour';
+
+        $fixtureTranslation = [
+            'Hello' => $expected
+        ];
+
+        /** @var Translate|MockObject $translate */
+        $translate = $this->getMockBuilder(Translate::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getTranslations', 'domain', 'lang', 'getLogger'])
+            ->getMock();
+
+
+        $notif = new Notification([
+            'message' => 'Language is not available for translation',
+            'level' => Notification::LVL_INFO,
+            'context' => [
+                'key' => $fixtureKey,
+                'domain' => $fixtureDomain,
+                'lang' => $fixtureLang,
+                'fallbackLang' => $fallbackLang,
+            ]
+        ]);
+
+        $fakeLogger = $this->getMockBuilder(Logger::class)->disableOriginalConstructor()->getMock();
+        $fakeLogger->expects($this->once())
+            ->method('notify')
+            ->with($notif);
+
+        $translate->expects($this->once())
+            ->method('getLogger')
+            ->willReturn($fakeLogger);
+
+        $translate->expects($this->once())
+            ->method('domain')
+            ->with($fixtureDomain)
+            ->willReturn($fixtureDomain);
+
+        $translate->expects($this->once())
+            ->method('lang')
+            ->with($fixtureLang)
+            ->willReturn($fixtureLang);
+
+        $translate->expects($this->at(2))
+            ->method('getTranslations')
+            ->with($fixtureDomain, $fixtureLang)
+            ->willThrowException(new TranslateException());
+
+        $translate->expects($this->at(3))
+            ->method('getTranslations')
+            ->with($fixtureDomain, $fallbackLang)
             ->willReturn($fixtureTranslation);
 
         $this->assertEquals($expected, $translate->translate($fixtureKey, $fixtureDomain, $fixtureLang));
