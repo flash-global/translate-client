@@ -10,8 +10,4 @@ parameters:
             encoding: UTF-8
         phpcpd:
             exclude: ['vendor']
-        phpmd:
-            exclude: ['tests/']
-            ruleset: [ruleset.xml]
-            triggered_by: ['php', 'phtml']
         codeception: ~
