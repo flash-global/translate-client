@@ -915,8 +915,12 @@ class TranslateTest extends TestCase
         /** @var Translate|MockObject $translate */
         $translate = $this->getMockBuilder(Translate::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getTranslations', 'domain', 'lang', 'getLogger'])
+            ->setMethods(['getTranslations', 'domain', 'lang', 'getLogger', 'getConfig'])
             ->getMock();
+
+        $translate->expects($this->once())
+            ->method('getConfig')
+            ->willReturn(['default-language' => $fallbackLang]);
 
 
         $notif = new Notification([
@@ -949,12 +953,12 @@ class TranslateTest extends TestCase
             ->with($fixtureLang)
             ->willReturn($fixtureLang);
 
-        $translate->expects($this->at(2))
+        $translate->expects($this->at(3))
             ->method('getTranslations')
             ->with($fixtureDomain, $fixtureLang)
             ->willThrowException(new TranslateException());
 
-        $translate->expects($this->at(3))
+        $translate->expects($this->at(4))
             ->method('getTranslations')
             ->with($fixtureDomain, $fallbackLang)
             ->willReturn($fixtureTranslation);

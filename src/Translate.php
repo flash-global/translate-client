@@ -36,7 +36,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
     const API_TRANSLATE_PATH_UPDATE = '/api/translation-cache';
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
-    const LANG_GB = 'en_GB';
 
     protected $staticCache = [];
 
@@ -54,11 +53,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @var string
      */
     protected $lang;
-
-    /**
-     * @var string
-     */
-    protected $fallbackLanguage = self::LANG_GB;
 
     /**
      * @var string
@@ -878,7 +872,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
         try {
             $translations = $this->getTranslations($domain, $lang);
         } catch (TranslateException $translateException) {
-            $translations = $this->getTranslations($domain, $this->fallbackLanguage);
+            if (empty($config['default-language'])) {
+                throw $translateException;
+            }
+
+            $translations = $this->getTranslations($domain, $config['default-language']);
 
             $notif = new Notification([
                 'message' => 'Language is not available for translation',
@@ -887,10 +885,10 @@ class Translate extends AbstractApiClient implements TranslateInterface
                     'key' => $key,
                     'domain' => $domain,
                     'lang' => $lang,
-                    'fallbackLang' => $this->fallbackLanguage,
+                    'fallbackLang' => $config['default-language'],
                 ]
             ]);
-            $lang = $this->fallbackLanguage;
+            $lang = $config['default-language'];
             $this->getLogger()->notify($notif);
         }
 
@@ -1047,19 +1045,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $this->response = $response;
         return $this;
     }
-
-    /**
-     * @param string $fallbackLanguage
-     *
-     * @return $this
-     */
-    public function setFallbackLanguage(string $fallbackLanguage)
-    {
-        $this->fallbackLanguage = $fallbackLanguage;
-
-        return $this;
-    }
-
 
     /**
      * @param string $message
