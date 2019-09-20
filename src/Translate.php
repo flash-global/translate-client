@@ -869,7 +869,29 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $translated = $key;
         $found = false;
 
-        $translations = $this->getTranslations($domain, $lang);
+        try {
+            $translations = $this->getTranslations($domain, $lang);
+        } catch (TranslateException $translateException) {
+            if (empty($config['default-language'])) {
+                throw $translateException;
+            }
+
+            $translations = $this->getTranslations($domain, $config['default-language']);
+
+            $notif = new Notification([
+                'message' => 'Language is not available for translation',
+                'level' => Notification::LVL_INFO,
+                'context' => [
+                    'key' => $key,
+                    'domain' => $domain,
+                    'lang' => $lang,
+                    'fallbackLang' => $config['default-language'],
+                ]
+            ]);
+            $lang = $config['default-language'];
+            $this->getLogger()->notify($notif);
+        }
+
         $sanitizedKeys = $config['sanitizedKeys'] ?? false;
         if ($sanitizedKeys) {
             $key = $this->sanitizeKey($key);
