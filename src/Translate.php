@@ -1017,7 +1017,6 @@ class Translate extends AbstractApiClient implements TranslateInterface
      */
     public function setLogger(Logger $logger)
     {
-        $logger->setFilterLevel(Notification::LVL_WARNING);
         $this->logger = $logger;
 
         return $this;
