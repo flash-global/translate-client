@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b5d608b33a9075fe1d6dc23b507281b",
+    "content-hash": "4321f9067b1706308d8088055f467d9b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -412,6 +412,12 @@
                 "url": "https://github.com/flash-global/api-client.git",
                 "reference": "f925992cbda504a466a8cb36f0e7f509a4a5b53f"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/flash-global/api-client/zipball/f925992cbda504a466a8cb36f0e7f509a4a5b53f",
+                "reference": "f925992cbda504a466a8cb36f0e7f509a4a5b53f",
+                "shasum": ""
+            },
             "require": {
                 "fei/entities": "1.*",
                 "guzzlehttp/guzzle": "^6.3",
@@ -433,6 +439,7 @@
                     "Fei\\ApiClient\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],
@@ -493,6 +500,12 @@
                 "url": "https://github.com/flash-global/logger-client.git",
                 "reference": "32ba2bedf3e864aab2f9514264a69629ec815af8"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/flash-global/logger-client/zipball/32ba2bedf3e864aab2f9514264a69629ec815af8",
+                "reference": "32ba2bedf3e864aab2f9514264a69629ec815af8",
+                "shasum": ""
+            },
             "require": {
                 "fei/api-client": "^1.1.0",
                 "fei/logger-common": "^1.1.20"
@@ -508,6 +521,7 @@
                     "Fei\\Service\\Logger\\Client\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],
@@ -576,6 +590,12 @@
                 "url": "https://github.com/flash-global/translate-common.git",
                 "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25"
             },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/flash-global/translate-common/zipball/4beca7c1007571a5fbb0c81580bf65978de32c25",
+                "reference": "4beca7c1007571a5fbb0c81580bf65978de32c25",
+                "shasum": ""
+            },
             "require": {
                 "fei/entities": "^1.0.3",
                 "league/fractal": "^0.14.0"
@@ -589,6 +609,7 @@
                     "Fei\\Service\\Translate\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
                     "name": "Vincent Simonin",
@@ -2779,6 +2800,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2015-10-02T06:51:40+00:00"
         },
         {
@@ -3748,28 +3770,25 @@
         },
         {
             "name": "symfony/dependency-injection",
-            "version": "v2.8.45",
+            "version": "v3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dependency-injection.git",
-                "reference": "ad2446d39d11c3daaa7f147d957941a187e47357"
+                "reference": "1534e480b2d18bf1b0acb05271bab75118d022c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/ad2446d39d11c3daaa7f147d957941a187e47357",
-                "reference": "ad2446d39d11c3daaa7f147d957941a187e47357",
+                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/1534e480b2d18bf1b0acb05271bab75118d022c2",
+                "reference": "1534e480b2d18bf1b0acb05271bab75118d022c2",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.9"
-            },
-            "conflict": {
-                "symfony/expression-language": "<2.6"
+                "php": ">=5.5.9"
             },
             "require-dev": {
-                "symfony/config": "~2.2|~3.0.0",
-                "symfony/expression-language": "~2.6|~3.0.0",
-                "symfony/yaml": "~2.3.42|~2.7.14|~2.8.7|~3.0.7"
+                "symfony/config": "~2.8|~3.0",
+                "symfony/expression-language": "~2.8|~3.0",
+                "symfony/yaml": "~2.8.7|~3.0.7|~3.1.1|~3.2"
             },
             "suggest": {
                 "symfony/config": "",
@@ -3780,7 +3799,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.8-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
@@ -3807,7 +3826,7 @@
             ],
             "description": "Symfony DependencyInjection Component",
             "homepage": "https://symfony.com",
-            "time": "2018-07-26T11:13:39+00:00"
+            "time": "2016-07-30T07:22:48+00:00"
         },
         {
             "name": "symfony/dom-crawler",
