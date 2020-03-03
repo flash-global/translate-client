@@ -109,16 +109,15 @@ class Translate extends AbstractApiClient implements TranslateInterface
         }
 
         if ($this->checkWritable($config['data_path']) || $this->checkWritable($config['translations_path'])) {
-            if ($this->getLogger() instanceof Logger) {
-                $notif = new Notification([
-                    'message' => 'Directories not writable',
+            $this->notify(
+                'Directories not writable',
+                [
                     'level' => Notification::LVL_WARNING,
                     'context' => [
-                        'directories' => $config['data_path'] . ' and ' . $config['translations_path']
-                    ]
-                ]);
-                $this->getLogger()->notify($notif);
-            }
+                        'directories' => $config['data_path'] . ' and ' . $config['translations_path'],
+                    ],
+                ]
+            );
         }
         return true;
     }
@@ -878,18 +877,20 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
             $translations = $this->getTranslations($domain, $config['default-language']);
 
-            $notif = new Notification([
-                'message' => 'Language is not available for translation',
-                'level' => Notification::LVL_INFO,
-                'context' => [
-                    'key' => $key,
-                    'domain' => $domain,
-                    'lang' => $lang,
-                    'fallbackLang' => $config['default-language'],
+            $this->notify(
+                'Language is not available for translation',
+                [
+                    'level' => Notification::LVL_INFO,
+                    'context' => [
+                        'key'          => $key,
+                        'domain'       => $domain,
+                        'lang'         => $lang,
+                        'fallbackLang' => $config['default-language'],
+                    ],
                 ]
-            ]);
+            );
+
             $lang = $config['default-language'];
-            $this->getLogger()->notify($notif);
         }
 
         $sanitizedKeys = $config['sanitizedKeys'] ?? false;
@@ -905,18 +906,18 @@ class Translate extends AbstractApiClient implements TranslateInterface
             $translated = $translations[$this->sanitizeKey($key)];
         }
 
-        if ($this->logOnMissingTranslation && false === $found && $this->getLogger() instanceof Logger) {
-            $notif = new Notification([
-                'message' => 'Translation not found!',
-                'level' => $this->logLevel,
-                'context' => [
-                    'key' => $key,
-                    'domain' => $domain,
-                    'lang' => $lang
+        if ($this->logOnMissingTranslation && false === $found) {
+            $this->notify(
+                'Translation not found!',
+                [
+                    'level'   => $this->logLevel,
+                    'context' => [
+                        'key'    => $key,
+                        'domain' => $domain,
+                        'lang'   => $lang,
+                    ],
                 ]
-            ]);
-
-            $this->getLogger()->notify($notif);
+            );
         }
 
         return $translated;

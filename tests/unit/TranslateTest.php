@@ -939,7 +939,7 @@ class TranslateTest extends TestCase
             ->method('notify')
             ->with($notif);
 
-        $translate->expects($this->once())
+        $translate->expects($this->exactly(2))
             ->method('getLogger')
             ->willReturn($fakeLogger);
 
