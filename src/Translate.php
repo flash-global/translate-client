@@ -34,6 +34,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
     const API_TRANSLATE_PATH_INFO = '/api/i18n-string';
     const API_TRANSLATE_PATH_UPDATE = '/api/translation-cache';
+    const API_TRANSLATE_PATH_LANGUAGES = '/api/language';
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
 
@@ -172,6 +173,32 @@ class Translate extends AbstractApiClient implements TranslateInterface
         $i18nString = $this->fetch($request);
 
         return $i18nString;
+    }
+
+    /**
+     * @param bool $onlyActive
+     *
+     * @return array
+     *
+     * @throws \Fei\ApiClient\ApiClientException
+     * @throws \Fei\ApiClient\Transport\TransportException
+     */
+    public function fetchLanguages($onlyActive)
+    {
+        $this->checkTransport();
+
+        $path = self::API_TRANSLATE_PATH_LANGUAGES;
+        if ($onlyActive) {
+            $path .= '?onlyActive=1';
+        }
+
+        $request = (new RequestDescriptor())
+            ->setMethod('GET')
+            ->setUrl($this->buildUrl($path));
+
+        $response = $this->send($request);
+
+        return json_decode($response->getBody(), true) ?: [];
     }
 
     /**
