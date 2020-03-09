@@ -298,6 +298,28 @@ class TranslateTest extends TestCase
         $this->assertEquals(new I18nString($data), $result);
     }
 
+    public function testFetchLanguages()
+    {
+        $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
+        $request = new RequestDescriptor();
+        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport->expects($this->once())->method('send')->willReturnCallback(
+            function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
+                $request = $requestDescriptor;
+                $flag = $mFlag;
+                return (new ResponseDescriptor())->setBody(json_encode(['French' => 'FR_fr']));
+            }
+        );
+
+        $translate->setTransport($transport);
+        $result = $translate->fetchLanguages(true);
+
+        $this->assertEquals($request->getMethod(), 'GET');
+        $this->assertEquals($request->getUrl(), 'http://url/api/language?onlyActive=1');
+
+        $this->assertEquals(['French' => 'FR_fr'], $result);
+    }
+
     public function testStore()
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
