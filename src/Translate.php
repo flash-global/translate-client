@@ -34,7 +34,7 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
     const API_TRANSLATE_PATH_INFO = '/api/i18n-string';
     const API_TRANSLATE_PATH_UPDATE = '/api/translation-cache';
-    const API_TRANSLATE_PATH_LANGUAGES = '/api/language';
+    const API_TRANSLATE_PATH_LANGUAGES = '/api/languages';
     const OPTION_LOG_ON_MISSING_TRANSLATION = 'logOnMissingTranslation';
     const OPTION_LOG_LEVEL = 'logLevel';
 

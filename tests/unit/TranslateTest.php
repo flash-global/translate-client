@@ -315,7 +315,7 @@ class TranslateTest extends TestCase
         $result = $translate->fetchLanguages(true);
 
         $this->assertEquals($request->getMethod(), 'GET');
-        $this->assertEquals($request->getUrl(), 'http://url/api/language?onlyActive=1');
+        $this->assertEquals($request->getUrl(), 'http://url/api/languages?onlyActive=1');
 
         $this->assertEquals(['French' => 'FR_fr'], $result);
     }
