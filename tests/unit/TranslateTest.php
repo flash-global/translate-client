@@ -30,7 +30,7 @@ class TranslateTest extends TestCase
 {
     public function testConstructorWhenConfigFileNotFound()
     {
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
 
         Stub::construct(Translate::class, [], [
             'getConfigFilePath' => 'fake-path'
@@ -84,7 +84,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->fetchOne(1);
@@ -258,7 +258,7 @@ class TranslateTest extends TestCase
             }),
         ]);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Call url not configured in the config file!');
 
         $translate->unsubscribe();
@@ -270,7 +270,7 @@ class TranslateTest extends TestCase
 
         $data = $this->getValidI18nString()->toArray();
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->withConsecutive(
             [
                 $this->callback(function (RequestDescriptor $requestDescriptor) use (&$request1) {
@@ -302,7 +302,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
         $request = new RequestDescriptor();
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -327,7 +327,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -359,7 +359,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->store(new I18nString());
@@ -369,7 +369,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
         $string = new I18nString();
@@ -378,7 +378,7 @@ class TranslateTest extends TestCase
             ->setKey('KEY')
             ->setContent('Content');
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         $translate->update($string);
     }
 
@@ -386,12 +386,12 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
         $string = 'string';
 
-        $this->setExpectedException(Exception::class);
+        $this->expectException(Exception::class);
         //$this->setExpectedExceptionMessage('You have to send an I18nString entity!');
         $translate->update($string);
     }
@@ -403,7 +403,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -436,7 +436,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
 
         $translate->update(new I18nString());
     }
@@ -445,7 +445,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
 
         $translate->delete(new I18nString());
     }
@@ -457,7 +457,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -486,7 +486,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -515,7 +515,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -540,10 +540,10 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $translate->setTransport($transport);
 
-        $this->setExpectedException(TranslateException::class, null, 400);
+        $this->expectException(TranslateException::class, null, 400);
 
         $translate->delete(new \stdClass());
     }
@@ -552,7 +552,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->search(Pattern::contains('fake-content'));
@@ -567,7 +567,7 @@ class TranslateTest extends TestCase
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $transport, $data) {
                 $request = $requestDescriptor;
@@ -589,7 +589,7 @@ class TranslateTest extends TestCase
     {
         $translate = new Translate([Translate::OPTION_BASEURL => 'http://url']);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Transport has to be set');
 
         $translate->find('KEY');
@@ -604,7 +604,7 @@ class TranslateTest extends TestCase
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -631,7 +631,7 @@ class TranslateTest extends TestCase
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -658,7 +658,7 @@ class TranslateTest extends TestCase
         $data = $this->getValidI18nString()->toArray();
         $string = new I18nString($data);
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor) use (&$request, $data) {
                 $request = $requestDescriptor;
@@ -684,7 +684,7 @@ class TranslateTest extends TestCase
         $request = new RequestDescriptor();
         $flag = null;
 
-        $transport = $this->getMock(SyncTransportInterface::class);
+        $transport = $this->createMock(SyncTransportInterface::class);
         $transport->expects($this->once())->method('send')->willReturnCallback(
             function (RequestDescriptor $requestDescriptor, $mFlag) use (&$request, &$flag, $transport) {
                 $request = $requestDescriptor;
@@ -736,7 +736,7 @@ class TranslateTest extends TestCase
 
     public function testGetClientWhenItHasNotBeenSet()
     {
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
         //$this->setExpectedExceptionMessage('Client has to be set before using it!');
         Translate::getClient();
     }
@@ -781,7 +781,7 @@ class TranslateTest extends TestCase
         $fixtureDomain = 'domain';
         $fixtureLang = 'fr_FR';
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
 
         $translate = $this->getMockBuilder(Translate::class)
             ->disableOriginalConstructor()
@@ -1079,7 +1079,7 @@ class TranslateTest extends TestCase
         $this->assertNull($res);
 
         $i18nString->setContent('');
-        $this->setExpectedException(ValidationException::class);
+        $this->expectException(ValidationException::class);
         //$this->setExpectedExceptionMessage('I18nString entity is not valid: (content: Content cannot be empty)');
         $this->invokeNonPublicMethod($translate, 'validateI18nString', [$i18nString]);
     }
@@ -1279,7 +1279,7 @@ class TranslateTest extends TestCase
 
         $fixtureBodyJson = '["test"]';
 
-        $requestDescriptorMock = $this->getMock(ResponseDescriptor::class);
+        $requestDescriptorMock = $this->createMock(ResponseDescriptor::class);
 
         $bodyMock = $this->getMockBuilder(ResponseInterface::class)
             ->setMethods(['getContents'])
@@ -1364,7 +1364,7 @@ class TranslateTest extends TestCase
             ->method('getConfig')
             ->willReturn([]);
 
-        $this->setExpectedException(TranslateException::class);
+        $this->expectException(TranslateException::class);
 
         $translate->fetchAll();
     }

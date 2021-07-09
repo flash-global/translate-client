@@ -177,6 +177,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
 
     /**
      * @return array|mixed
+     * @throws \Fei\ApiClient\ApiClientException
+     * @throws \Fei\ApiClient\Transport\TransportException
      */
     public function getLanguages() {
         if (empty($this->staticCache['languages'])) {
