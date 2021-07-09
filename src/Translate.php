@@ -180,7 +180,8 @@ class Translate extends AbstractApiClient implements TranslateInterface
      * @throws \Fei\ApiClient\ApiClientException
      * @throws \Fei\ApiClient\Transport\TransportException
      */
-    public function getLanguages() {
+    public function getLanguages()
+    {
         if (empty($this->staticCache['languages'])) {
             $config = $this->getConfig();
 
