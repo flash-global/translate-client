@@ -176,6 +176,26 @@ class Translate extends AbstractApiClient implements TranslateInterface
     }
 
     /**
+     * @return array|mixed
+     * @throws \Fei\ApiClient\ApiClientException
+     * @throws \Fei\ApiClient\Transport\TransportException
+     */
+    public function getLanguages()
+    {
+        if (empty($this->staticCache['languages'])) {
+            $config = $this->getConfig();
+
+            if (isset($config['translations_path']) && is_readable($config['translations_path'] . '/languages.php')) {
+                $this->staticCache['languages'] = include $config['translations_path'] . '/languages.php';
+            } else {
+                $this->staticCache['languages'] = $this->fetchLanguages(true);
+            }
+        }
+
+        return $this->staticCache['languages'];
+    }
+
+    /**
      * @param bool $onlyActive
      *
      * @return array
@@ -284,10 +304,11 @@ class Translate extends AbstractApiClient implements TranslateInterface
     /**
      * In charge to get translations from all translate servers
      *
+     * @param bool $prefetchLanguages
      * @throws TranslateException
      * @throws \Exception
      */
-    public function fetchAll()
+    public function fetchAll($prefetchLanguages = false)
     {
         if (!$this->lockFileExpired()) {
             return;
@@ -313,6 +334,26 @@ class Translate extends AbstractApiClient implements TranslateInterface
             if (!empty($namespaces)) {
                 $this->fetchAllByServer($namespaces, $server);
             }
+        }
+
+        if ($prefetchLanguages) {
+            $this->prefetchLanguages();
+        }
+    }
+
+    /**
+     * Setting languages into local cache
+     */
+    protected function prefetchLanguages()
+    {
+        $languages = $this->fetchLanguages(true);
+
+        if (!empty($languages) && is_array($languages)) {
+            $languagesExport = PHP_EOL . var_export($languages, true);
+            $data = "<?php return $languagesExport;";
+
+            $config = $this->getConfig();
+            file_put_contents($config['translations_path'] . DIRECTORY_SEPARATOR . 'languages.php', $data);
         }
     }
 
